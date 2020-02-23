@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<BoilerPlate_1>
+	<BoilerPlate_2>
+
+
+			<EquityIndexValues>
+
+				<COLUMN_2>2_Example-2</COLUMN_2>
+				<COLUMN_3>3_Example-2</COLUMN_3>
+				<COLUMN_4>4_Example-2</COLUMN_4>
+				<COLUMN_5>5_Example-2</COLUMN_5>
+				<COLUMN_6>6_Example-2</COLUMN_6>
+
+			</EquityIndexValues>
+
+			<EquityIndexValues>
+			
+				<COLUMN_1>1_Example-2-Leg-2</COLUMN_1>
+				<COLUMN_2>2_Example-2-Leg-2</COLUMN_2>
+				
+				<COLUMN_5>5_Example-2-Leg-2</COLUMN_5>
+				<COLUMN_6>6_Example-2-Leg-2</COLUMN_6>
+
+			</EquityIndexValues>
+
+
+	</BoilerPlate_2>
+
+</BoilerPlate_1>
+

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<BoilerPlate_1 timeStamp="2018-10-18T22:37:46Z" businessDate="2018-10-21" >
+
+	<BoilerPlate_2 recordVersion="1" type="SomeType">
+
+		<BoilerPlate_3>
+
+			<EquityIndexValues>
+
+				<COLUMN_1>1_Example-1</COLUMN_1>
+				<COLUMN_2>2_Example-1</COLUMN_2>
+				<COLUMN_3>3_Example-1</COLUMN_3>
+				<COLUMN_4>4_Example-1</COLUMN_4>
+				<COLUMN_5>5_Example-1</COLUMN_5>
+				<COLUMN_6>6_Example-1</COLUMN_6>
+
+			</EquityIndexValues>
+
+			<EquityIndexValues>
+			
+				<COLUMN_1>1_Example-1-Leg-2</COLUMN_1>
+				<COLUMN_2>2_Example-1-Leg-2</COLUMN_2>
+				<COLUMN_3>3_Example-1-Leg-2</COLUMN_3>
+				<COLUMN_4>4_Example-1-Leg-2</COLUMN_4>
+				<COLUMN_5>5_Example-1-Leg-2</COLUMN_5>
+				<COLUMN_6>6_Example-1-Leg-2</COLUMN_6>
+
+
+			</EquityIndexValues>
+
+		</BoilerPlate_3>
+
+	</BoilerPlate_2>
+
+</BoilerPlate_1>
+
