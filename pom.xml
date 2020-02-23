@@ -37,6 +37,7 @@
   
     <modules>
    		<module>xml-stomper</module>
+   		<module>etcetera</module>
     </modules>
 
 	<profiles>

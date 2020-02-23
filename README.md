@@ -14,7 +14,8 @@ The XML-Stomper example is the first step towards that goal.
 
 _Still requires some work to make more generic_
 
-    
+## Etcetera
 
+A number of small relatively inconsequential programs and examples that may be useful to serve as 'mental' notes when building out larger applications.
 
 
