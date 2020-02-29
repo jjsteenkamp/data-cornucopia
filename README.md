@@ -18,4 +18,12 @@ _Still requires some work to make more generic_
 
 A number of small relatively inconsequential programs and examples that may be useful to serve as 'mental' notes when building out larger applications.
 
+## JDBC-Runner
+
+A very simple and very tactical tool that can be used to execute a number of JDBC statements against a number of databases.
+
+Was used as part of a project to do some data discovery.
+
+
+    
 
