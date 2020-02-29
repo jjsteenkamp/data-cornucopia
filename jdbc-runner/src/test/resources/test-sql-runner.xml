@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sqlRunners>
+
+    <runners>
+        <jdbcDriver>org.h2.Driver</jdbcDriver>
+        <jdbcUrl>jdbc:h2:./target/SQLRunnerTest/db</jdbcUrl>
+        <jdbcUsername></jdbcUsername>
+        <jdbcPassword></jdbcPassword>
+        
+        <replaceParameter key="##SORT_BY##">
+            <value>1</value>
+        </replaceParameter>
+        
+        <sqls csvFile="target/output-csv/gender-count.csv">
+            <value>Select COUNT(1), GENDER from GLA_SURVEY GROUP BY Gender order by ##SORT_BY## desc</value>
+        </sqls>
+        <sqls csvFile="target/output-csv/how-long-london.csv">
+            <value><![CDATA[
+   						Select COUNT(1), HowLongInLondon
+ from GLA_SURVEY GROUP BY HowLongInLondon
+ order by ##SORT_BY## desc
+					]]></value>
+        </sqls>
+        
+        <sqls csvFile="target/output-csv/alldata.csv">
+            <value><![CDATA[
+   						Select *  from GLA_SURVEY 
+					]]></value>
+        </sqls>
+        
+    </runners>
+    
+</sqlRunners>
