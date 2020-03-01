@@ -40,6 +40,7 @@
    		<module>xml-stomper</module>
    		<module>jdbc-runner</module>
    		<module>etcetera</module>
+   		<module>spark-examples</module>
     </modules>
 
 	<profiles>
@@ -87,8 +88,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-	                <source>11</source>
-			        <target>11</target>
+	                <source>1.8</source>
+			        <target>1.8</target>
 			    </configuration>
             </plugin>
             
@@ -107,19 +108,18 @@
 
     <dependencies>
     
-    	<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<version>${junit.jupiter.version}</version>
-			<scope>test</scope>
-			
-		</dependency>
- 
     </dependencies>
 
     <dependencyManagement>
     
         <dependencies>
+        
+        	<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>${junit.jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
  
     		<dependency>
 				<groupId>javax.servlet</groupId>

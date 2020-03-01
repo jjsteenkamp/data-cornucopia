@@ -25,5 +25,12 @@ A very simple and very tactical tool that can be used to execute a number of JDB
 Was used as part of a project to do some data discovery.
 
 
+## Spark Examples
+
+A few simple [Apache Spark](https://spark.apache.org/) examples demonstrating basic functionality. These examples can certainly be found elsewhere on the web or in the Apache Spark tutorials - however, it is sometimes useful to have examples you have written yourself and understand better. That is the only way you are able to teach that to others.
+
+Hopefully this section will grow over time.
+
+
     
 
