@@ -1,16 +1,14 @@
 # Spark Examples
 
-A few simple [Apache Spark](https://spark.apache.org/) examples demonstrating basic functionality. These examples can certainly be found elsewhere on the web or in the Apache Spark tutorials - however, it is sometimes useful to have examples you have written yourself and understand better. That is the only way you are able to teach that to others.
+A few simple [Apache Spark](https://spark.apache.org/) examples demonstrating basic functionality. These examples can certainly be found elsewhere on the web or in the Apache Spark tutorials - however, it is sometimes useful to have examples you have written yourself and understand better. 
 
 Hopefully this section will grow over time.
   
 ## elt-with-objects
-
-*ELT* - Extract Load Transform (a slight variation on the ETL you might be familiar with). Basically show cases how Apache Spark can be used as part of a data pipeline to load and join CSV data. 
-
-However, in this example is object centric rather than relational centric. 
-
-The model for these market objects are driven off a Java definition under "src/main/java/uk/co/devworx/spark_examples/elt/model". It contains the basics - e.g. beans, immutable object builders and validators. These will form the basis of the examples.
+f
+*ELT* - Extract Load Transform (a slight variation on the ETL you might be familiar with). Basically show cases how Apache Spark can be used as part of a data pipeline to load and validate CSV data using an object model. 
+ 
+The model for these market objects are driven off a Java definition under "src/main/java/uk/co/devworx/spark_examples/elt/model". It contains the basics - e.g. beans, immutable object builders and validators. 
 
 ## Running the Examples
 
@@ -18,9 +16,9 @@ Assuming you have a standard Java and Maven environment set up - you can simply 
 
 ## Running in Spark Shell 
 
-You need to download Apache Spark from their downloads area - [https://spark.apache.org/downloads.html](https://spark.apache.org/downloads.html). This particular version was tested with Apache Spark 2.4.5.
+You need to download Apache Spark from the downloads area - [https://spark.apache.org/downloads.html](https://spark.apache.org/downloads.html). This particular version was tested with Apache Spark 2.4.5.
 
-Once you have extracted the binaries, you can start up the shell with the appropriate dependencies included. In this case, it includes the domain model class from the 'elt-with-objects' project:
+Once you have extracted the binaries, you can start up the shell with the appropriate dependencies included. In this case, it includes the domain model classes from the built 'elt-with-objects' project:
 
 ```
 ./spark-shell --jars /mnt/JS/git/data-cornucopia/spark-examples/elt-with-objects/target/elt-with-objects-1.0-SNAPSHOT.jar
@@ -32,7 +30,7 @@ Now that you have the Spark shell started up, you should be able to run a number
 
 ### 01) Load CSV File Into Stock Objects, Calculate Mid Prices
 
-You should be able to copy and paste these into your Apache Spark shell (assuming you have corrected the CSV and JAR paths to point to the correct locations on your machine).
+You should be able to copy and paste these into your Apache Spark shell (assuming you have corrected the CSV path to point to the correct locations on your machine).
 
 The first example reads from the CSV file, converts the rows to objects (using the builder from the object model) and then invokes the individual objects to 
 
