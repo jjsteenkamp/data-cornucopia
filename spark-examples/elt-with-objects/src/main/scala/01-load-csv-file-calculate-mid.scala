@@ -24,7 +24,7 @@ var df_stockPrices = df.map(row => StockPrice.builder()
                                              .setAdjustedVolume(row.getAs(15))
                                              .setDividend(row.getAs(16))
                                              .build()     
-					        )
+                            )
 					        
 df_stockPrices.foreach(fef => println(fef.getStockId() + " -> calculatedMid : " + fef.getCalculatedMid() + ", calculatedAdjustedMid : " + fef.getCalculatedAdjustedMid())) 
 				

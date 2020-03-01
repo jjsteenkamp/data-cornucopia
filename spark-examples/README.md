@@ -39,7 +39,6 @@ The first example reads from the CSV file, converts the rows to objects (using t
 This code is also available in "src/main/scala/01-load-csv-file-calculate-mid.scala".
 
 ```scala
-
 import uk.co.devworx.spark_examples.elt.model._
 import spark.implicits._
 import org.apache.spark.sql._
@@ -65,9 +64,9 @@ var df_stockPrices = df.map(row => StockPrice.builder()
                                              .setAdjustedVolume(row.getAs(15))
                                              .setDividend(row.getAs(16))
                                              .build()     
-					        )
+                            )
 					        
-df_stockPrices.foreach(fef => println(fef.getStockId() + " -> calculatedMid : " + fef.getCalculatedMid() + ", calculatedAdjustedMid : " + fef.getCalculatedAdjustedMid()))
+df_stockPrices.foreach(fef => println(fef.getStockId() + " -> calculatedMid : " + fef.getCalculatedMid() + ", calculatedAdjustedMid : " + fef.getCalculatedAdjustedMid())) 
 ```
 
 ### 02) Load CSV File and Run Validations
@@ -77,7 +76,6 @@ The second example reads from the CSV file and runs the validation from the obje
 This code is also available in "src/main/scala/02-load-csv-file-run-validations.scala".
 
 ```scala
-
 import uk.co.devworx.spark_examples.elt.model._
 import spark.implicits._
 import org.apache.spark.sql._
@@ -105,8 +103,8 @@ var df_failures = df.map(row => StockPrice.builder()
                                           .setAdjustedVolume(row.getAs(15))
                                           .setDividend(row.getAs(16))
                                           .getValidationFailures()     
-					        )
-					       
+                        )
+					        
 df_failures.foreach(fef =>  ( if(fef.size() > 0) {  println(fef)  }  )  )
 ```
 

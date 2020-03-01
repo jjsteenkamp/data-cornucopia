@@ -26,7 +26,7 @@ var df_failures = df.map(row => StockPrice.builder()
                                           .setAdjustedVolume(row.getAs(15))
                                           .setDividend(row.getAs(16))
                                           .getValidationFailures()     
-					        )
+                        )
 					        
 df_failures.foreach(fef =>  ( if(fef.size() > 0) {  println(fef)  }  )  )
 					 
