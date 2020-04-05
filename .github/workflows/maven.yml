@@ -14,4 +14,9 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: mvn -B clean deploy --file pom.xml
+      run: mvn -B clean install --file pom.xml
+
+    - name: Publish to GitHub Packages Apache Maven
+        run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
+          env:
+            GITHUB_TOKEN: ${{ github.token }}
