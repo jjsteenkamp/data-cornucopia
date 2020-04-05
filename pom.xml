@@ -41,7 +41,6 @@
    		<module>jdbc-runner</module>
    		<module>etcetera</module>
    		<module>spark-examples</module>
-   		<module>websocket-reference</module>
     </modules>
 
 	<profiles>
