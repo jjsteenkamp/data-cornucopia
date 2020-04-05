@@ -21,3 +21,4 @@ jobs:
         run: mvn deploy -DskipTests=true
         env:
           GITHUB_TOKEN: ${{ github.token }} # GITHUB_TOKEN is the default env for the password
+
