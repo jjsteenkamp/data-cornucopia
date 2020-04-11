@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Test Against LTS Java Version & the Latest Version
-        java: [ 8, 11, 14 ]
+        # Test Against LTS Java Versions
+        java: [ 8, 11 ]
 
     steps:
       - uses: actions/checkout@v2
