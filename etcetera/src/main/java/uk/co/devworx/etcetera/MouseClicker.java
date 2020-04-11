@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Simple class to click the mouse - e.g. like a dashboard of sorts. 
- * 
+ *
  * @author jsteenkamp
  *
  */
