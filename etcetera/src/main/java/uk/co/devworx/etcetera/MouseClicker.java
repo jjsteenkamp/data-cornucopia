@@ -24,11 +24,11 @@ public class MouseClicker
 		while(true)
 		{
 			PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-			Point location = pointerInfo.getLocation();
-			
-			int x = location.x;
-			int y = location.y;
-			
+			Point location = pointerInfo == null ? (null) : pointerInfo.getLocation();
+
+			int x = (location == null) ? -1 : location.x;
+			int y = (location == null) ? -1 : location.y;
+
 			robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
 			TimeUnit.MILLISECONDS.sleep(200);
 			robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);

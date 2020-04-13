@@ -23,12 +23,13 @@ public class MouseMover
 		
 		while(true)
 		{
-			PointerInfo pointerInfo = MouseInfo.getPointerInfo();
-			Point location = pointerInfo.getLocation();
-			boolean upOrDown = ThreadLocalRandom.current().nextBoolean();
-			
-			int x = location.x;
-			int y = location.y;
+			final PointerInfo pointerInfo = MouseInfo.getPointerInfo();
+			final Point location = pointerInfo == null ? (null) : pointerInfo.getLocation();
+
+			final int x = (location == null) ? 0 : location.x;
+			final int y = (location == null) ? 0 : location.y;
+			final boolean upOrDown = ThreadLocalRandom.current().nextBoolean();
+
 			int newX = x + (upOrDown ? 1 : -1);
 			
 			if(upOrDown == true)

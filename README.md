@@ -18,6 +18,18 @@ _Still requires some work to make more generic_
 
 A number of small relatively inconsequential programs and examples that may be useful to serve as 'mental' notes when building out larger applications.
 
+Assuming you have a recent version of Java installed (i.e. Java 11+) then you should simply be able to call either the Mouse Mover or Mouse Clicker applications:
+
+```
+java etcetera/src/main/java/uk/co/devworx/etcetera/MouseMover.java
+```
+
+Or 
+
+```
+java etcetera/src/main/java/uk/co/devworx/etcetera/MouseClicker.java
+```
+
 ## JDBC-Runner
 
 A very simple and very tactical tool that can be used to execute a number of JDBC statements against a number of databases.

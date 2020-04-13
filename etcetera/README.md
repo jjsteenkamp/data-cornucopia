@@ -7,13 +7,13 @@ A number of small relatively inconsequential programs and examples that may be u
 Assuming you have a recent version of Java installed (i.e. Java 11+) then you should simply be able to call :
 
 ```
-java etcetera/src/main/java/uk/co/devworx/etcetera/MouseMover.java
+java src/main/java/uk/co/devworx/etcetera/MouseMover.java
 ```
 
 Or 
 
 ```
-java etcetera/src/main/java/uk/co/devworx/etcetera/MouseClicker.java
+java src/main/java/uk/co/devworx/etcetera/MouseClicker.java
 ```
 
 This should yield you something like:
