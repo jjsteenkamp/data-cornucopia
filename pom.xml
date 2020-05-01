@@ -41,6 +41,7 @@
    		<module>jdbc-runner</module>
    		<module>etcetera</module>
    		<module>spark-examples</module>
+		<module>excel-integration</module>
     </modules>
 
 	<profiles>
@@ -269,3 +270,4 @@
 
 
 </project>
+
