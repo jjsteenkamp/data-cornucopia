@@ -43,6 +43,10 @@ A few simple [Apache Spark](https://spark.apache.org/) examples demonstrating ba
 
 Hopefully this section will grow over time.
 
-
+## Excel Intregation
     
+There are still a fair amount of companies out there that have a heavy reliance on the use of desktop Excel - in many cases a rather old version of excel. Yes, Financial Services - that basically means you.
+    
+This project contains a simple reference point that can convert from Excel (as was required on an ad-hoc basis by a number of customer projects.)
+
 
