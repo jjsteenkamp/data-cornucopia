@@ -1,6 +1,6 @@
 name: Java 8 / 11 Build on Linux - Package Push
 
-on: [push]
+on: [repository_dispatch]
 
 jobs:
   build:
