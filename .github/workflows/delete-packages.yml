@@ -1,5 +1,9 @@
 name: Delete All Packages
 
+on:
+  schedule:
+    - cron:  '2 2 * * *'
+
 jobs:
   build:
 
