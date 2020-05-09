@@ -1,4 +1,3 @@
-![Java 8 / 11 Build on Linux](https://github.com/jjsteenkamp/data-cornucopia/workflows/Java%208%20/%2011%20Build%20on%20Linux%20-%20Package%20Push/badge.svg)
 
 ![Java 8 / 11 Build on Windows](https://github.com/jjsteenkamp/data-cornucopia/workflows/Java%208%20/%2011%20Build%20on%20Windows/badge.svg)
 

@@ -1,4 +1,4 @@
-name: Java 8 / 11 Build on Linux - Package Push
+name: Java 8 / 11 Build on Linux
 
 on: [push]
 
