@@ -1,6 +1,9 @@
 name: Delete All Packages
 
-on: [repository_dispatch]
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '1 1 * * *'
 
 jobs:
   build:
