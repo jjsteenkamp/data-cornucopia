@@ -1,7 +1,8 @@
 name: Delete All Packages
 
-on: repository_dispatch
-  types: [opened]
+on:
+  milestone:
+    types: [closed]
 
 jobs:
   build:
