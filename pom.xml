@@ -271,7 +271,7 @@
 		<repository>
 			<id>github</id>
 			<name>GitHub OWNER Apache Maven Packages</name>
-			<url>https://maven.pkg.github.com/jjsteenkamp/data-cornucopia</url>
+			<url>https://maven.pkg.github.com/DevWorxCo/data-cornucopia</url>
 		</repository>
 	</distributionManagement>
 
