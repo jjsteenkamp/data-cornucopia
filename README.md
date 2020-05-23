@@ -53,7 +53,7 @@ There are still a fair amount of companies out there that have a heavy reliance 
     
 This project contains a simple reference point that can convert from Excel (as was required on an ad-hoc basis by a number of customer projects.)
 
-# PDF Utilities
+## PDF Utilities
 
 This project contains some utilities to deal with PDF documents. It uses the excellent PDF Box library : https://pdfbox.apache.org/
 
