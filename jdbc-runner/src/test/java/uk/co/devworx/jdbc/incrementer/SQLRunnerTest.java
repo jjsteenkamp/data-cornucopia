@@ -1,4 +1,4 @@
-package uk.co.devworx.jdbc;
+package uk.co.devworx.jdbc.incrementer;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

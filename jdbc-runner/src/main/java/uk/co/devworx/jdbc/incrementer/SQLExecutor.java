@@ -1,4 +1,4 @@
-package uk.co.devworx.jdbc;
+package uk.co.devworx.jdbc.incrementer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

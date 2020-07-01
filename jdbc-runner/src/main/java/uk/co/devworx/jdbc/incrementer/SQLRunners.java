@@ -1,4 +1,4 @@
-package uk.co.devworx.jdbc;
+package uk.co.devworx.jdbc.incrementer;
 
 import java.util.ArrayList;
 import java.util.List;
