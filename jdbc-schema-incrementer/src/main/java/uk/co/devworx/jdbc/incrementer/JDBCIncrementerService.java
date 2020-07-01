@@ -3,12 +3,9 @@ package uk.co.devworx.jdbc.incrementer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.Set;
+import java.nio.file.Path;
+import java.sql.*;
+import java.util.*;
 
 /**
  * A service class to deal with the various JDBC incrementer functions.
@@ -45,7 +42,7 @@ public class JDBCIncrementerService
 	private final boolean upperCaseIdentifiers;
 
 	private JDBCIncrementerService(Connection con,
-								   Map<String, String> envirronmentProperties)
+								   Map<String, String> envirronmentProperties) throws JDBCIncrementerServiceException
 	{
 		this.con = con;
 		this.envirronmentProperties = envirronmentProperties;
@@ -58,9 +55,41 @@ public class JDBCIncrementerService
 		}
 		catch (SQLException throwables)
 		{
-			throw new RuntimeException("Unable to extract the database meta data : " + throwables, throwables);
+			throw new JDBCIncrementerServiceException("Unable to extract the database meta data : " + throwables, throwables);
 		}
 
+	}
+
+	/**
+	 *  The primary and most useful function in this implementation.
+	 *  Given a create SQL statement (that conforms to the appropriate standards)
+	 *  this will give you a Transform object that will describe
+	 *  What steps / mutations need to be performed to get from the before to the after table.
+	 *
+	 *  The appropriate SQL steps can then be generated from that item.
+	 *
+	 * @return
+	 */
+	public TableSchemaTransform getTransform(Path sqlCreateStmt)
+	{
+		final CreateTableScriptsUtil createUtils = CreateTableScriptsUtil.getInstance(sqlCreateStmt);
+		if(createUtils.hasErrors())
+		{
+			throw new JDBCIncrementerServiceException("Unable to introspect the create SQL script - " + createUtils.getErrorsReport());
+		}
+
+		String beforeTableName = createUtils.getTableName();
+		String beforeTableSchema = createUtils.getSchemaName();
+
+		TableSchemaDescriptor afterDescr = getTableSchemaDescriptorFromCreateScript(createUtils);
+		Optional<TableSchemaDescriptor> beforeDescrOpt = getTableSchemaDescriptor(beforeTableSchema, beforeTableName);
+
+		if( beforeDescrOpt.isPresent() == true)
+		{
+			return new TableSchemaTransform(beforeDescrOpt.get(), afterDescr);
+		}
+
+		return new TableSchemaTransform(afterDescr);
 	}
 
 	/**
@@ -87,30 +116,152 @@ public class JDBCIncrementerService
 		return true;
 	}
 
-	public TableSchemaDescriptor getTableSchemaDescriptor(String schemaP, String tableNameP)
+	private ResultSet getTableColumnsResultSet(String schema, String tableName) throws JDBCIncrementerServiceException
 	{
-		final String tableName = getTableName(tableNameP);
-		final String schema = getSchema(schemaP);
-		if(isValidTableName(tableName) == false)
-		{
-			throw new RuntimeException("You have not specified a valid table name : " + tableName);
-		}
-
 		try
 		{
-			final DatabaseMetaData dbMetaData = con.getMetaData();
-
-			ResultSet tables = dbMetaData.getTables(null, schema, tableName, null);
-			logger.info("Table = " + tableName + ", Schema = " + schema + " \n" + ResultSetUtils.toString(tables));
-
-			ResultSet tableCols = dbMetaData.getColumns(null, null, tableName.toUpperCase(), null);
-			logger.info("Table = " + tableName + ", Schema = " + schema + " \n" + ResultSetUtils.toString(tableCols));
-
-			return null;
+			ResultSet tables = dbMeta.getColumns(null, schema, tableName, null);
+			return tables;
 		}
 		catch(Exception e)
 		{
-			throw new RuntimeException("Unable to get the table schema descriptor : " + e, e);
+			throw new JDBCIncrementerServiceException("Unable to get the table schema descriptor : " + e, e);
+		}
+	}
+
+	/**
+	 * A handy debug function for getting tha table column result set.
+	 *
+	 * @param schema
+	 * @param tableName
+	 * @return
+	 */
+	public String getTableColumnsResultSetDebug(String schema, String tableName) throws JDBCIncrementerServiceException
+	{
+		final String tableNameToUse =  getTableName(tableName);
+		final String schemaNameToUse =  getSchema(schema);
+
+		try(ResultSet rs = getTableColumnsResultSet(schema, tableName))
+		{
+			StringBuilder sb = ResultSetUtils.toString(rs);
+			sb.insert(0, "\nTable Name: " + tableNameToUse + "\nSchema Name: " + schemaNameToUse + "\n");
+			return sb.toString();
+		}
+		catch(SQLException e)
+		{
+			String msg = "Encountered an SQL exception while trying to debug the schema.table - " + schemaNameToUse + "." + tableNameToUse + " -> " + e;
+			logger.error(msg, e);
+			throw new JDBCIncrementerServiceException(msg, e);
+		}
+	}
+
+	/**
+	 * Convenience overload for the other method of the same name;
+	 *
+	 * @param createScriptSql
+	 */
+	public TableSchemaDescriptor getTableSchemaDescriptorFromCreateScript(String createScriptSql)
+	{
+		final CreateTableScriptsUtil createUtil = CreateTableScriptsUtil.getInstance(createScriptSql);
+		return getTableSchemaDescriptorFromCreateScript(createUtil);
+	}
+
+
+	/**
+	 * Creates a schema descriptor from a create script.
+	 *
+	 * It does this by creating a table with generated name. Such that it does not clash with the original
+	 *
+	 * @return
+	 */
+	public TableSchemaDescriptor getTableSchemaDescriptorFromCreateScript(final CreateTableScriptsUtil createUtil) throws JDBCIncrementerServiceException
+	{
+		if(createUtil.getErrors().isEmpty() == false)
+		{
+			throw new RuntimeException(createUtil.getErrorsReport());
+		}
+
+		final CreateTableScriptsUtil.CreateTransientTableScript transientScript = createUtil.createTransientScript();
+
+		try(final Statement stmt = con.createStatement())
+		{
+			logger.info("Creating a Transient Table - " + transientScript.getTransientTableName() + " - in order to get a descriptor...");
+			stmt.execute(replaceEnvs(transientScript.getCreateTableScript()));
+			logger.info("Created Transient Table - " + transientScript.getTransientTableName() + " - Now we can infer the descriptor..");
+
+			final Optional<TableSchemaDescriptor> optSchema = getTableSchemaDescriptor(transientScript.getTransientTableSchema(), createUtil.getTableName(), transientScript.getTransientTableName());
+			if(optSchema.isPresent() == false)
+			{
+				throw new JDBCIncrementerServiceException("Unable to create a schema for the transient table : " +  transientScript.getTransientTableName());
+			}
+
+			return optSchema.get();
+		}
+		catch(SQLException e)
+		{
+			String msg = "Encountered an SQL exception while attempting to set up the transient table - " + transientScript.getTransientTableName() + " : " + e;
+			logger.error(msg, e);
+			throw new JDBCIncrementerServiceException(msg, e);
+		}
+
+	}
+
+	public Optional<TableSchemaDescriptor> getTableSchemaDescriptor(String schemaP,
+																	String tableNameP) throws JDBCIncrementerServiceException
+	{
+		return getTableSchemaDescriptor(schemaP, tableNameP, Optional.empty());
+	}
+
+	public Optional<TableSchemaDescriptor> getTableSchemaDescriptor(String schemaP,
+																	String tableNameP,
+																	String transientNameP) throws JDBCIncrementerServiceException
+	{
+		return getTableSchemaDescriptor(schemaP, tableNameP, Optional.of(transientNameP));
+	}
+
+	public Optional<TableSchemaDescriptor> getTableSchemaDescriptor(String schemaP,
+																	String tableNameP,
+																	Optional<String> transientNameP) throws JDBCIncrementerServiceException
+	{
+		final String tableNameToUse =  getTableName(transientNameP.orElse(tableNameP));
+		final Optional<String> transientNameToUse =  transientNameP.isPresent() ? Optional.of(getTableName(transientNameP.get())) : transientNameP;
+		final String schema = getSchema(schemaP);
+
+		if(isValidTableName(tableNameToUse) == false)
+		{
+			throw new JDBCIncrementerServiceException("You have not specified a valid table name : " + tableNameToUse);
+		}
+
+		try(final ResultSet tableDetails = getTableColumnsResultSet(schema, tableNameToUse))
+		{
+			if(tableDetails.next() == false)
+			{
+				return Optional.empty();
+			}
+
+			final TableSchemaDescriptor tblDescriptor = new TableSchemaDescriptor(schema,
+																				  tableNameToUse,
+																				  transientNameToUse);
+			final List<TableColumn> columns = new ArrayList<>();
+
+			do
+			{
+				final String colName = tableDetails.getString("COLUMN_NAME");
+				final int colDataType = tableDetails.getInt("DATA_TYPE");
+				final String colDataTypeName = tableDetails.getString("TYPE_NAME");
+				final int ordinal = tableDetails.getInt("ORDINAL_POSITION");
+				final boolean isNullable = tableDetails.getString("IS_NULLABLE").equalsIgnoreCase("YES");
+				TableColumn tableColumn = new TableColumn(tblDescriptor, colName, colDataTypeName, colDataType, ordinal, isNullable);
+				columns.add(tableColumn);
+			}
+			while(tableDetails.next());
+			Collections.sort(columns);
+			tblDescriptor.addColumns(columns);
+			return Optional.of(tblDescriptor);
+		}
+		catch(Exception e)
+		{
+			throw new JDBCIncrementerServiceException("Unable to get the table schema descriptor : " + e, e);
 		}
 	}
 
@@ -142,7 +293,6 @@ public class JDBCIncrementerService
 		}
 		return res;
 	}
-
 
 
 }
