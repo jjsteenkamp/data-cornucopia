@@ -12,6 +12,8 @@ public class TableSchemaDescriptor
 	private final String schema;
 	private final String rootName;
 
+	private final Optional<CreateTableScriptsUtil.CreateTransientTableScript> transientCreateScript;
+
 	/**
 	 * Specfied if this is a transient table.
 	 */
@@ -19,14 +21,30 @@ public class TableSchemaDescriptor
 
 	TableSchemaDescriptor(String schema,
 						  String rootName,
-						  Optional<String> transientName)
+						  Optional<String> transientName,
+						  Optional<CreateTableScriptsUtil.CreateTransientTableScript> transientCreateScript)
 	{
 		this.rootName = rootName;
 		this.transientName = transientName;
 		this.schema = schema;
 		this.columns = new LinkedHashMap<>();
+		this.transientCreateScript = transientCreateScript;
 	}
 
+	public String getSchema()
+	{
+		return schema;
+	}
+
+	public String getRootName()
+	{
+		return rootName;
+	}
+
+	public Optional<CreateTableScriptsUtil.CreateTransientTableScript> getTransientCreateScript()
+	{
+		return transientCreateScript;
+	}
 
 	public Map<String, TableColumn> getColumns()
 	{
@@ -52,6 +70,20 @@ public class TableSchemaDescriptor
 		return schema + "." + rootName + "(transient_name=" + transientName.orElse("<none>") + ")";
 	}
 
+	@Override public boolean equals(Object o)
+	{
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		TableSchemaDescriptor that = (TableSchemaDescriptor) o;
+		return Objects.equals(schema, that.schema) && Objects.equals(rootName, that.rootName) && Objects.equals(transientName, that.transientName);
+	}
+
+	@Override public int hashCode()
+	{
+		return Objects.hash(schema, rootName, transientName);
+	}
 }
 
 class TableColumn implements Comparable<TableColumn>
@@ -78,6 +110,31 @@ class TableColumn implements Comparable<TableColumn>
 		this.isNullable = isNullable;
 	}
 
+	public int getOrdinal()
+	{
+		return ordinal;
+	}
+
+	public TableSchemaDescriptor getParent()
+	{
+		return parent;
+	}
+
+	public String getSqlColumnTypeName()
+	{
+		return sqlColumnTypeName;
+	}
+
+	public int getSqlColumnType()
+	{
+		return sqlColumnType;
+	}
+
+	public boolean isNullable()
+	{
+		return isNullable;
+	}
+
 	@Override public int compareTo(TableColumn o)
 	{
 		int c1 = ordinal;
@@ -96,4 +153,21 @@ class TableColumn implements Comparable<TableColumn>
 	{
 		return "TableColumn{" + "parentName=" + parent.getTitle() + ", columnName='" + columnName + '\'' + ", sqlColumnTypeName='" + sqlColumnTypeName + '\'' + ", sqlColumnType=" + sqlColumnType + ", ordinal=" + ordinal + ", isNullable=" + isNullable + '}';
 	}
+
+	@Override public boolean equals(Object o)
+	{
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		TableColumn that = (TableColumn) o;
+		return sqlColumnType == that.sqlColumnType && ordinal == that.ordinal && isNullable == that.isNullable && Objects.equals(parent, that.parent) && Objects.equals(columnName, that.columnName) && Objects.equals(sqlColumnTypeName, that.sqlColumnTypeName);
+	}
+
+	@Override public int hashCode()
+	{
+		return Objects.hash(parent, columnName, sqlColumnTypeName, sqlColumnType, ordinal, isNullable);
+	}
+
+
 }

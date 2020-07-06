@@ -82,7 +82,7 @@ public class JDBCIncrementerService
 		String beforeTableSchema = createUtils.getSchemaName();
 
 		TableSchemaDescriptor afterDescr = getTableSchemaDescriptorFromCreateScript(createUtils);
-		Optional<TableSchemaDescriptor> beforeDescrOpt = getTableSchemaDescriptor(beforeTableSchema, beforeTableName);
+		Optional<TableSchemaDescriptor> beforeDescrOpt = getTableSchemaDescriptor(beforeTableSchema, beforeTableName, Optional.empty());
 
 		if( beforeDescrOpt.isPresent() == true)
 		{
@@ -185,21 +185,34 @@ public class JDBCIncrementerService
 
 		try(final Statement stmt = con.createStatement())
 		{
-			logger.info("Creating a Transient Table - " + transientScript.getTransientTableName() + " - in order to get a descriptor...");
-			stmt.execute(replaceEnvs(transientScript.getCreateTableScript()));
-			logger.info("Created Transient Table - " + transientScript.getTransientTableName() + " - Now we can infer the descriptor..");
+			final String fullyResolvedSchema = replaceEnvs(transientScript.getUnresolvedTransientTableSchema());
+			final String fullyResolvedName = replaceEnvs(transientScript.getUnresolvedTransientTableName());
+			final String fullyResolvedCreate = replaceEnvs(transientScript.getUnresolvedCreateTableScript());
 
-			final Optional<TableSchemaDescriptor> optSchema = getTableSchemaDescriptor(transientScript.getTransientTableSchema(), createUtil.getTableName(), transientScript.getTransientTableName());
+			transientScript.setResolvedCreateTableScript(fullyResolvedCreate);
+			transientScript.setResolvedTransientTableName(fullyResolvedName);
+			transientScript.setResolvedTransientTableSchema(fullyResolvedSchema);
+
+			logger.info("Creating a Transient Table - " + transientScript.getResolvedTransientTableName() + " - in order to get a descriptor...");
+
+			stmt.execute(fullyResolvedCreate);
+			logger.info("Created Transient Table - " + transientScript.getResolvedTransientTableName() + " - Now we can infer the descriptor..");
+
+			final Optional<TableSchemaDescriptor> optSchema = getTableSchemaDescriptor(transientScript.getResolvedTransientTableSchema().get(),
+																					   createUtil.getTableName(),
+																					   transientScript.getResolvedTransientTableName().get(),
+																					   Optional.of(transientScript)
+			 																		  );
 			if(optSchema.isPresent() == false)
 			{
-				throw new JDBCIncrementerServiceException("Unable to create a schema for the transient table : " +  transientScript.getTransientTableName());
+				throw new JDBCIncrementerServiceException("Unable to create a schema for the transient table : " + fullyResolvedName );
 			}
 
 			return optSchema.get();
 		}
 		catch(SQLException e)
 		{
-			String msg = "Encountered an SQL exception while attempting to set up the transient table - " + transientScript.getTransientTableName() + " : " + e;
+			String msg = "Encountered an SQL exception while attempting to set up the transient table - " + transientScript.getUnresolvedTransientTableName() + " : " + e;
 			logger.error(msg, e);
 			throw new JDBCIncrementerServiceException(msg, e);
 		}
@@ -207,21 +220,24 @@ public class JDBCIncrementerService
 	}
 
 	public Optional<TableSchemaDescriptor> getTableSchemaDescriptor(String schemaP,
-																	String tableNameP) throws JDBCIncrementerServiceException
+																	String tableNameP,
+																	Optional<CreateTableScriptsUtil.CreateTransientTableScript> transientCreateScriptP) throws JDBCIncrementerServiceException
 	{
-		return getTableSchemaDescriptor(schemaP, tableNameP, Optional.empty());
+		return getTableSchemaDescriptor(schemaP, tableNameP, Optional.empty(),transientCreateScriptP);
 	}
 
 	public Optional<TableSchemaDescriptor> getTableSchemaDescriptor(String schemaP,
 																	String tableNameP,
-																	String transientNameP) throws JDBCIncrementerServiceException
+																	String transientNameP,
+																	Optional<CreateTableScriptsUtil.CreateTransientTableScript> transientCreateScriptP) throws JDBCIncrementerServiceException
 	{
-		return getTableSchemaDescriptor(schemaP, tableNameP, Optional.of(transientNameP));
+		return getTableSchemaDescriptor(schemaP, tableNameP, Optional.of(transientNameP), transientCreateScriptP);
 	}
 
 	public Optional<TableSchemaDescriptor> getTableSchemaDescriptor(String schemaP,
 																	String tableNameP,
-																	Optional<String> transientNameP) throws JDBCIncrementerServiceException
+																	Optional<String> transientNameP,
+																	Optional<CreateTableScriptsUtil.CreateTransientTableScript> transientCreateScriptP) throws JDBCIncrementerServiceException
 	{
 		final String tableNameToUse =  getTableName(transientNameP.orElse(tableNameP));
 		final Optional<String> transientNameToUse =  transientNameP.isPresent() ? Optional.of(getTableName(transientNameP.get())) : transientNameP;
@@ -241,7 +257,8 @@ public class JDBCIncrementerService
 
 			final TableSchemaDescriptor tblDescriptor = new TableSchemaDescriptor(schema,
 																				  tableNameToUse,
-																				  transientNameToUse);
+																				  transientNameToUse,
+																				  transientCreateScriptP);
 			final List<TableColumn> columns = new ArrayList<>();
 
 			do

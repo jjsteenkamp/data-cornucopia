@@ -14,9 +14,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -29,6 +27,7 @@ public class JDBCIncrementerServiceTest
 	final Path dbPath = Paths.get("target/test-database");
 	final String jdbcURL = "jdbc:h2:" + dbPath.toFile().getAbsolutePath();
 	final Connection con;
+	final Statement stmt;
 	final Map<String, String> envVariables;
 	final String tableName;
 	final String schemaName;
@@ -58,6 +57,7 @@ public class JDBCIncrementerServiceTest
 		Class<?> drmv = Class.forName(Driver.class.getCanonicalName());
 		logger.info("Driver Class : " + drmv);
 		con = DriverManager.getConnection(jdbcURL, "sa", "");
+		stmt = con.createStatement();
 
 		envVariables = new HashMap<>();
 		envVariables.put("TARGET_DB","INFO");
@@ -94,7 +94,7 @@ public class JDBCIncrementerServiceTest
 		String tblColumns = incrementerService.getTableColumnsResultSetDebug(schemaName, tableName);
 		logger.info(tblColumns);
 
-		final Optional<TableSchemaDescriptor> descr = incrementerService.getTableSchemaDescriptor(schemaName, tableName);
+		final Optional<TableSchemaDescriptor> descr = incrementerService.getTableSchemaDescriptor(schemaName, tableName, Optional.empty());
 
 		Assertions.assertNotNull(descr);
 		Assertions.assertTrue(descr.isPresent());
@@ -110,13 +110,77 @@ public class JDBCIncrementerServiceTest
 	}
 
 	@Test
-	public void testTableAppendedColumnsTransformSchemaDescriptor()
+	public void testTableAppendedColumnsTransformSchemaDescriptor() throws Exception
 	{
-		final TableSchemaTransform transform = incrementerService.getTransform(Paths.get("src/test/resources/sql-schema/01-appended-columns/tbl_rainbow_schema.sql"));
-		Assertions.assertEquals(TableSchemaTransform.TransformType.TableMutation, transform.getTransformType());
-
-
+		testTransform("src/test/resources/sql-schema/01-appended-columns/tbl_rainbow_schema.sql");
 	}
+
+	@Test
+	public void testTableInsertedColumnsTransformSchemaDescriptor() throws Exception
+	{
+		testTransform("src/test/resources/sql-schema/02-inserted-columns/tbl_rainbow_schema.sql");
+	}
+
+	@Test
+	public void testTableTypeChangesColumnsTransformSchemaDescriptor() throws Exception
+	{
+		testTransform("src/test/resources/sql-schema/03-column-type-changes/tbl_rainbow_schema.sql");
+	}
+
+	@Test
+	public void testTableRemoveColumnsTransformSchemaDescriptor() throws Exception
+	{
+		testTransform("src/test/resources/sql-schema/04-removed-columns/tbl_rainbow_schema.sql");
+	}
+
+	public void testTransform(String createTransform) throws Exception
+	{
+		String sql = null;
+		try
+		{
+			logger.info("===================================================================================================================================================\n" + "DOING : " + createTransform + "\n"
+								+ "===================================================================================================================================================\n");
+
+			final TableSchemaTransform transform = incrementerService.getTransform(Paths.get(createTransform));
+			Assertions.assertEquals(TableSchemaTransform.TransformType.TableMutation, transform.getTransformType());
+
+			final String changeFindingsReport = transform.getChangeFindingsReport();
+
+			logger.info("Change findings Report : " + changeFindingsReport);
+
+			String transformStepsReport = transform.getTransformStepsReport();
+
+			logger.info("Transform Steps Report : " + transformStepsReport);
+
+			final String sqlExecReport = transform.getSQLExecReport();
+
+			logger.info("SQL Exec Report : " + sqlExecReport);
+
+			//Now execute each of the SQL statements...
+
+			LinkedHashMap<String, String> sqls = transform.generateCreateDDLSQL();
+			Set<String> keys = sqls.keySet();
+			for (String key : keys)
+			{
+				logger.info("Executing : " + key);
+				sql = sqls.get(key);
+				stmt.execute(sql);
+			}
+
+			ResultSet rs = stmt.executeQuery("SELECT * FROM INFO.TEST_TBL_RAINBOW_SCHEMA");
+			StringBuilder result = ResultSetUtils.toString(rs);
+			logger.info(result);
+		}
+		catch(Throwable thr)
+		{
+			logger.error("FAILURE executing : " + sql);
+			logger.error(thr, thr);
+			Assertions.fail(thr);
+		}
+	}
+
+
+
 
 
 

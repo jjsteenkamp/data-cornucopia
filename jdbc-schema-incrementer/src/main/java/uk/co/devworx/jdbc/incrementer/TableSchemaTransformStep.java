@@ -8,15 +8,12 @@ import java.util.Optional;
  */
 public class TableSchemaTransformStep
 {
-
 	public static enum StepType
 	{
 		NoChange,  //To indicate no change from the before to the after columns
-		AppendedColumn,
 		InsertedColumn,
 		TypeChangedColumn,
 		RemovedColumn,
-		RenamedColumn
 	}
 
 	private final Optional<TableColumn> beforeColumn;
@@ -35,4 +32,23 @@ public class TableSchemaTransformStep
 		this.ordinal = ordinal;
 	}
 
+	public Optional<TableColumn> getBeforeColumn()
+	{
+		return beforeColumn;
+	}
+
+	public Optional<TableColumn> getAfterColumn()
+	{
+		return afterColumn;
+	}
+
+	public StepType getStepType()
+	{
+		return stepType;
+	}
+
+	public int getOrdinal()
+	{
+		return ordinal;
+	}
 }

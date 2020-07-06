@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * In order for the auto database incrementer to work, it is essential
@@ -46,6 +47,10 @@ public class CreateTableScriptsUtil
 		private final String transientTableSchema;
 		private final String createTableScript;
 
+		private final AtomicReference<String> resolvedCreateTableScript = new AtomicReference<>();
+		private final AtomicReference<String> resolvedTransientTableName = new AtomicReference<>();
+		private final AtomicReference<String> resolvedTransientTableSchema = new AtomicReference<>();
+
 		CreateTransientTableScript(final String transientTableSchema,
 								   final String transientTableName,
 								   final String createTableScript)
@@ -55,17 +60,56 @@ public class CreateTableScriptsUtil
 			this.createTableScript = createTableScript;
 		}
 
-		public String getTransientTableName()
+
+		public String getUnresolvedTransientTableName()
 		{
 			return transientTableName;
 		}
 
-		public String getCreateTableScript()
+		void setResolvedCreateTableScript(String resolvedScript)
+		{
+			resolvedCreateTableScript.set(resolvedScript);
+		}
+
+		void setResolvedTransientTableSchema(String resolvedScript)
+		{
+			resolvedTransientTableSchema.set(resolvedScript);
+		}
+
+		void setResolvedTransientTableName(String resolvedScript)
+		{
+			resolvedTransientTableName.set(resolvedScript);
+		}
+
+		public Optional<String> getResolvedTransientTableSchema()
+		{
+			if(resolvedTransientTableSchema.get() == null) return Optional.empty();
+			return Optional.of(resolvedTransientTableSchema.get());
+		}
+
+		public Optional<String> getResolvedTransientTableName()
+		{
+			if(resolvedTransientTableName.get() == null) return Optional.empty();
+			return Optional.of(resolvedTransientTableName.get());
+		}
+
+		public Optional<String> getResolvedCreateTableScript()
+		{
+			if(resolvedCreateTableScript.get() == null)
+			{
+				return Optional.empty();
+			}
+			return Optional.of(resolvedCreateTableScript.get());
+		}
+
+
+
+		public String getUnresolvedCreateTableScript()
 		{
 			return createTableScript;
 		}
 
-		public String getTransientTableSchema()
+		public String getUnresolvedTransientTableSchema()
 		{
 			return transientTableSchema;
 		}

@@ -39,7 +39,7 @@ public class CreateTableScriptsUtilTest
 
 		CreateTableScriptsUtil.CreateTransientTableScript trans = sc2.createTransientScript();
 
-		logger.info(trans.getCreateTableScript());
+		logger.info(trans.getUnresolvedCreateTableScript());
 
 	}
 

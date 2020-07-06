@@ -1,19 +1,15 @@
 
-CREATE SCHEMA IF NOT EXISTS ${TARGET_DB};
-
 DROP TABLE IF EXISTS ${TARGET_DB}.${NAMESPACE}tbl_rainbow_schema;
 
 CREATE TABLE ${TARGET_DB}.${NAMESPACE}tbl_rainbow_schema
 (
     id                  VARCHAR(256),
     double_value        DOUBLE,
-    timestamp_value     TIMESTAMP,
-    int_value           INT,
+    timestamp_value     VARCHAR(256),
+    int_value           VARCHAR(256),
     float_value         FLOAT,
     bigint_value        BIGINT
 );
-
-INSERT INTO ${TARGET_DB}.${NAMESPACE}tbl_rainbow_schema values ('1',100.0,'2020-10-10 14:02:33',10, 101.1, 1000000);
 
 
 
