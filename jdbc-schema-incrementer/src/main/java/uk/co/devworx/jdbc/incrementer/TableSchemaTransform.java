@@ -82,7 +82,7 @@ public class TableSchemaTransform
 		beforeOpt = Optional.empty();
 		this.after = after;
 		this.transformType = TransformType.NewTable;
-		this.transformSteps = Collections.emptyList();
+		this.transformSteps = new ArrayList<>();
 		this.analysisResult = TransformAnalysisResult.Attested;
 
 		newColumns = new ConcurrentSkipListSet<>(after.getColumns().values());
