@@ -292,6 +292,7 @@ public class TableSchemaTransform
 		copyOverData.deleteCharAt(copyOverData.length() - 1);
 		copyOverData.append("\n");
 		copyOverData.append(" FROM " + beforeTableName);
+		copyOverData.append("\n;\n");
 
 		res.put(DDL_STEP_COPY_OVER_DATA, copyOverData.toString());
 
