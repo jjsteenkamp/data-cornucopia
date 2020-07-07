@@ -207,6 +207,17 @@ public class CreateTableScriptsUtil
 			{
 				String sn = fqTableName.substring(0, dotIndex);
 				String tbl = fqTableName.substring(dotIndex + 1);
+
+				if(tbl.contains("("))
+				{
+					tbl = tbl.substring(0, tbl.indexOf("(")).trim();
+				}
+
+				if(tbl.contains(" "))
+				{
+					tbl = tbl.substring(0, tbl.indexOf(" ")).trim();
+				}
+
 				if(sn.length() > 0)
 				{
 					schemaName = Optional.of(sn);
