@@ -133,6 +133,14 @@ public class JDBCIncrementerServiceTest
 		testTransform("src/test/resources/sql-schema/04-removed-columns/tbl_rainbow_schema.sql");
 	}
 
+	@Test
+	public void testTableNoChangesTransformSchemaDescriptor() throws Exception
+	{
+		final TableSchemaTransform transform = incrementerService.getTransform(Paths.get("src/test/resources/sql-schema/05-no-changes/tbl_rainbow_schema.sql"));
+		Assertions.assertEquals(TableSchemaTransform.TransformType.NoChanges, transform.getTransformType());
+	}
+
+
 	public void testTransform(String createTransform) throws Exception
 	{
 		String sql = null;

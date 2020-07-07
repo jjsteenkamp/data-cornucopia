@@ -18,6 +18,14 @@ public class TableSchemaTransform
 {
 	private static final Logger logger = LogManager.getLogger(TableSchemaTransform.class);
 
+	public static final String DDL_STEP_TABLE_CONVERSION_ASSERTS = "Table Conversion Asserts";
+	public static final String DDL_STEP_DROP_IF_EXISTS = "Drop Temporary Table If Exists";
+	public static final String DDL_STEP_CREATE_TEMP_TABLE = "Create Temporary Table";
+	public static final String DDL_STEP_COPY_OVER_DATA = "Copy Over Data";
+	public static final String DDL_STEP_RENAME_EXISTING_TABLE_TO_OLD = "Rename Existing Table to Old";
+	public static final String DDL_STEP_RENAME_TMP_TABLE_TO_NEW = "Rename Tmp Table to New";
+	public static final String DDL_STEP_DROP_PREVIOUS_IF_EXISTS = "Drop Previous Temporary Table";
+
 	public static enum TransformType
 	{
 		/**
@@ -30,7 +38,12 @@ public class TableSchemaTransform
 		 * has to be a step of SQL Statements that need to
 		 * be performed to get from one to the other.
 		 */
-		TableMutation
+		TableMutation,
+
+		/**
+		 * Transform type indicating that there are no changes to the given table.
+		 */
+		NoChanges
 	}
 
 	public static enum TransformAnalysisResult
@@ -91,7 +104,6 @@ public class TableSchemaTransform
 		this.beforeOpt = Optional.of(beforeP);
 		this.after = after;
 		this.transformSteps = new ArrayList<>();
-		this.transformType = TransformType.TableMutation;
 
 		//Ok, now we need to do the differences calc.
 		final Map<TableColumn, Integer> newOrdinals = new HashMap<>();
@@ -112,6 +124,15 @@ public class TableSchemaTransform
 		newColumns = findNewColumns(beforeOpt.get(), after);
 		removedColumns = findRemovedColumns(beforeOpt.get(), after);
 		columnsWithChangedTypes = findColumnsChangedTypes(beforeOpt.get(), after);
+
+		if(newColumns.isEmpty() && removedColumns.isEmpty() && columnsWithChangedTypes.isEmpty())
+		{
+			this.transformType = TransformType.NoChanges;
+		}
+		else
+		{
+			this.transformType = TransformType.TableMutation;
+		}
 
 		if(newColumns.isEmpty() == false && removedColumns.isEmpty() == false)
 		{
@@ -231,13 +252,14 @@ public class TableSchemaTransform
 		}
 		if(assertTransforms.length() > 0 )
 		{
-			res.put("Table Conversion Asserts", assertTransforms.toString());
+			res.put(DDL_STEP_TABLE_CONVERSION_ASSERTS, assertTransforms.toString());
 		}
 
-		//generateColumnTransformCode
 
-		res.put("DROP Temporary Name If Exists", "DROP TABLE IF EXISTS " + tmpTableName + " ;");
-		res.put("CREATE Temporary Table", transScript.getResolvedCreateTableScript().get());
+
+
+		res.put(DDL_STEP_DROP_IF_EXISTS, "DROP TABLE IF EXISTS " + tmpTableName + " ;");
+		res.put(DDL_STEP_CREATE_TEMP_TABLE, transScript.getResolvedCreateTableScript().get());
 
 		//Now copy over the data ....
 		StringBuilder copyOverData = new StringBuilder();
@@ -271,11 +293,11 @@ public class TableSchemaTransform
 		copyOverData.append("\n");
 		copyOverData.append(" FROM " + beforeTableName);
 
-		res.put("COPY Over Data", copyOverData.toString());
+		res.put(DDL_STEP_COPY_OVER_DATA, copyOverData.toString());
 
-		res.put("Rename Existing Table to OLD ", " ALTER TABLE " + beforeTableName + " RENAME TO " + tmpTableName + "_previous ;");
-
-		res.put("Rename Tmp Table to New ", " ALTER TABLE " + tmpTableName + " RENAME TO " + beforeTableName + " ;");
+		res.put(DDL_STEP_RENAME_EXISTING_TABLE_TO_OLD, " ALTER TABLE " + beforeTableName + " RENAME TO " + tmpTableName + "_previous ;");
+		res.put(DDL_STEP_RENAME_TMP_TABLE_TO_NEW, " ALTER TABLE " + tmpTableName + " RENAME TO " + beforeTableName + " ;");
+		res.put(DDL_STEP_DROP_PREVIOUS_IF_EXISTS, " DROP TABLE " + tmpTableName + "_previous ;");
 
 		return res;
 	}
