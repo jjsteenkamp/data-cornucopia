@@ -361,7 +361,7 @@ public class TableSchemaTransform
 
 		columnsWithChangedTypes.forEach(c ->
         {
-			TableColumn targetCol = after.getColumns().get(c.getColumnName());
+			TableColumn targetCol = beforeOpt.get().getColumns().get(c.getColumnName());
 			String newDataType = targetCol != null ? targetCol.getSqlColumnTypeName() : "#ERROR";
 			typeChangesColumnsAsciiTable.addRow(c.getParent().getRootName(), c.getColumnName(), c.getSqlColumnTypeName(), newDataType, c.getOrdinal());
 		});
