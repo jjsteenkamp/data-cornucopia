@@ -232,12 +232,31 @@ public class TableSchemaTransform
 
 		if(transScriptOpt.isPresent() == false)
 		{
-			throw new RuntimeException("Unable to generate a SQL DDL Script - as the 'after' table descriptor does not actually have a transient create script !");
+			throw new IllegalStateException("Unable to generate a SQL DDL Script - as the 'after' table descriptor does not actually have a transient create script !");
 		}
 
 		final CreateTableScriptsUtil.CreateTransientTableScript transScript = transScriptOpt.get();
-		final String tmpTableName = transScript.getResolvedTransientTableSchema().get() + "." + transScript.getResolvedTransientTableName().get();
-		final String beforeTableName = getBefore().get().getSchema() + "." + getBefore().get().getRootName();
+
+		if(transScript.getResolvedTransientTableSchema().isPresent() == false)
+		{
+			throw new IllegalStateException("Expected getResolvedTransientTableSchema not to be null");
+		}
+
+		if(transScript.getResolvedTransientTableName().isPresent() == false)
+		{
+			throw new IllegalStateException("Expected getResolvedTransientTableName not to be null");
+		}
+
+		if(transScript.getResolvedCreateTableScript().isPresent() == false)
+		{
+			throw new IllegalStateException("Expected getResolvedCreateTableScript not to be null");
+		}
+
+		final TableSchemaDescriptor beforeDescr = getBefore().orElseThrow(() -> new IllegalStateException("Expected getBefore() not to be null"));
+
+		final String tmpTableName = transScript.getResolvedTransientTableSchema().orElseThrow(() -> new IllegalStateException("You cannot reach this point")) + "." +
+									transScript.getResolvedTransientTableName().orElseThrow(() -> new IllegalStateException("You cannot reach this point"));
+		final String beforeTableName = beforeDescr.getSchema() + "." + beforeDescr.getRootName();
 
 		//Any transform assert scripts
 		StringBuilder assertTransforms = new StringBuilder();
@@ -245,8 +264,14 @@ public class TableSchemaTransform
 		{
 			if(step.getStepType().equals(TableSchemaTransformStep.StepType.TypeChangedColumn))
 			{
-				assertTransforms.append("SELECT " + SQLDataTypeHelper.generateColumnTransformCode(step.getBeforeColumn().get(), step.getAfterColumn().get()) +
-										" AS " + step.getAfterColumn().get().getColumnName());
+				if(step.getAfterColumn().isPresent() == false || step.getBeforeColumn().isPresent() == false)
+				{
+					throw new IllegalStateException("In this context of where the type changed column is the type - you cannot have null values for the before or after column");
+				}
+
+				assertTransforms.append("SELECT " + SQLDataTypeHelper.generateColumnTransformCode(step.getBeforeColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point")),
+																								  step.getAfterColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point"))) +
+										" AS " + step.getAfterColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point")).getColumnName());
 				assertTransforms.append(" FROM " + beforeTableName + " ; \n");
 			}
 		}
@@ -256,10 +281,8 @@ public class TableSchemaTransform
 		}
 
 
-
-
 		res.put(DDL_STEP_DROP_IF_EXISTS, "DROP TABLE IF EXISTS " + tmpTableName + " ;");
-		res.put(DDL_STEP_CREATE_TEMP_TABLE, transScript.getResolvedCreateTableScript().get());
+		res.put(DDL_STEP_CREATE_TEMP_TABLE, transScript.getResolvedCreateTableScript().orElseThrow(() -> new IllegalStateException("You cannot reach this point")));
 
 		//Now copy over the data ....
 		StringBuilder copyOverData = new StringBuilder();
@@ -270,20 +293,20 @@ public class TableSchemaTransform
 			switch(step.getStepType())
 			{
 			case InsertedColumn:
-				copyOverData.append("\n\t\t NULL AS " + step.getAfterColumn().get().getColumnName());
+				copyOverData.append("\n\t\t NULL AS " + step.getAfterColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point")).getColumnName());
 				copyOverData.append(",");
 				break;
 			case NoChange:
-				copyOverData.append("\n\t\t " + step.getAfterColumn().get().getColumnName());
+				copyOverData.append("\n\t\t " + step.getAfterColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point")).getColumnName());
 				copyOverData.append(",");
 				break;
 			case TypeChangedColumn:
-				copyOverData.append("\n\t\t " + SQLDataTypeHelper.generateColumnTransformCode(step.getBeforeColumn().get(), step.getAfterColumn().get()) +
-											" AS " + step.getAfterColumn().get().getColumnName());
+				copyOverData.append("\n\t\t " + SQLDataTypeHelper.generateColumnTransformCode(step.getBeforeColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point")), step.getAfterColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point"))) +
+											" AS " + step.getAfterColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point")).getColumnName());
 				copyOverData.append(",");
 				break;
 			case RemovedColumn:
-				copyOverData.append("\n-- REMOVED Column : \t\t " + step.getBeforeColumn().get().getColumnName());
+				copyOverData.append("\n-- REMOVED Column : \t\t " + step.getBeforeColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point")).getColumnName());
 				break;
 			default:
 				throw new RuntimeException("Unknown step type - " + step.getStepType());
@@ -361,7 +384,7 @@ public class TableSchemaTransform
 
 		columnsWithChangedTypes.forEach(c ->
         {
-			TableColumn targetCol = beforeOpt.get().getColumns().get(c.getColumnName());
+			TableColumn targetCol = beforeOpt.orElseThrow(() -> new IllegalStateException("You cannot reach this point")).getColumns().get(c.getColumnName());
 			String newDataType = targetCol != null ? targetCol.getSqlColumnTypeName() : "#ERROR";
 			typeChangesColumnsAsciiTable.addRow(c.getParent().getRootName(), c.getColumnName(), c.getSqlColumnTypeName(), newDataType, c.getOrdinal());
 		});
@@ -394,10 +417,10 @@ public class TableSchemaTransform
 		{
 			transtepsTable.addRow(step.getOrdinal(),
 								  step.getStepType(),
-								  step.getBeforeColumn().isPresent() ? step.getBeforeColumn().get().getColumnName() : "",
-								  step.getBeforeColumn().isPresent() ? step.getBeforeColumn().get().getSqlColumnTypeName() : "",
-								  step.getAfterColumn().isPresent() ? step.getAfterColumn().get().getColumnName() : "",
-								  step.getAfterColumn().isPresent() ? step.getAfterColumn().get().getSqlColumnTypeName() : ""
+								  step.getBeforeColumn().isPresent() ? step.getBeforeColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point")).getColumnName() : "",
+								  step.getBeforeColumn().isPresent() ? step.getBeforeColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point")).getSqlColumnTypeName() : "",
+								  step.getAfterColumn().isPresent() ? step.getAfterColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point")).getColumnName() : "",
+								  step.getAfterColumn().isPresent() ? step.getAfterColumn().orElseThrow(() -> new IllegalStateException("You cannot reach this point")).getSqlColumnTypeName() : ""
 								 );
 		}
 		transtepsTable.addRule();

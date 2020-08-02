@@ -1,18 +1,5 @@
 package uk.co.devworx.xmlstomper;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.zip.GZIPInputStream;
-
-import javax.xml.parsers.SAXParserFactory;
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.logging.log4j.LogManager;
@@ -20,6 +7,19 @@ import org.apache.logging.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.*;
+import java.nio.file.Files;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.zip.GZIPInputStream;
 
 public class XmlToCSVStomper
 {
@@ -35,7 +35,25 @@ public class XmlToCSVStomper
 	public static final String RECORD_VERSION_COLUMN = "RecordVersion";
 	public static final String TYPE_COLUMN = "Type";
 	public static final String FILENAME_COLUMN = "FileName";
-	
+
+	private static final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+
+	private static SAXParser getSAXParser()
+	{
+		try
+		{
+			SAXParser parser = saxParserFactory.newSAXParser();
+			parser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+			parser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+			return parser;
+		}
+		catch (ParserConfigurationException | SAXException e)
+		{
+			throw new IllegalStateException("Encountered SAX Setup exception. : " + e, e);
+		}
+	}
+
+
 	public static void main(String... args) throws Exception
 	{
 		if(args.length < 3)
@@ -67,9 +85,8 @@ public class XmlToCSVStomper
 				return pathname.getName().endsWith(".xml") || pathname.getName().endsWith("gz");
 			}
 		});
-		
-		SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-		javax.xml.parsers.SAXParser saxParser = saxParserFactory.newSAXParser();
+
+		javax.xml.parsers.SAXParser saxParser = getSAXParser();
 	     
 		LinkedHashSet<String> allColumnNames = new LinkedHashSet<>();
 		allColumnNames.add(FILENAME_COLUMN);
@@ -84,10 +101,12 @@ public class XmlToCSVStomper
 			{
 				File xmlOrGz = allXmlOrGzFiles[i];
 				logger.info("Column Determinator Processing (1st pass) : " + xmlOrGz + " - file " + (i + 1) + " out of " + allXmlOrGzFiles.length);
-				InputStream ins = xmlOrGz.getName().endsWith(".gz") ? new GZIPInputStream(new FileInputStream(xmlOrGz)) : new FileInputStream(xmlOrGz);
-				BufferedInputStream xmlReader = new BufferedInputStream(ins);
-				saxParser.parse(xmlReader, handler);
-				xmlReader.close();
+				try(InputStream ins = xmlOrGz.getName().endsWith(".gz") ? new GZIPInputStream(new FileInputStream(xmlOrGz)) : new FileInputStream(xmlOrGz))
+				{
+					BufferedInputStream xmlReader = new BufferedInputStream(ins);
+					saxParser.parse(xmlReader, handler);
+					xmlReader.close();
+				}
 			}
 			allColumnNames.addAll(handler.getColumnNames());
 		}
@@ -99,7 +118,7 @@ public class XmlToCSVStomper
 		});
 		logger.info("No Processing real files");
 		
-		saxParser = saxParserFactory.newSAXParser();
+		saxParser = getSAXParser();
 	        
 		try(MyHandler handler = new MyHandler(csvTargetName, elementNameToUse, allColumnNames))
 		{
@@ -109,13 +128,12 @@ public class XmlToCSVStomper
 
 				logger.info("Processing : " + xmlOrGz + " - file " + (i + 1) + " out of " + allXmlOrGzFiles.length);
 
-				InputStream ins = xmlOrGz.getName().endsWith(".gz") ? new GZIPInputStream(new FileInputStream(xmlOrGz)) : new FileInputStream(xmlOrGz);
-				BufferedInputStream xmlReader = new BufferedInputStream(ins);
-				handler.setInputXMLFileName(xmlOrGz.getName());
-				
-				saxParser.parse(xmlReader, handler);
-
-				xmlReader.close();
+				try(InputStream ins = xmlOrGz.getName().endsWith(".gz") ? new GZIPInputStream(new FileInputStream(xmlOrGz)) : new FileInputStream(xmlOrGz);
+					BufferedInputStream xmlReader = new BufferedInputStream(ins))
+				{
+					handler.setInputXMLFileName(xmlOrGz.getName());
+					saxParser.parse(xmlReader, handler);
+				}
 			}
 		}
 		
@@ -130,17 +148,17 @@ public class XmlToCSVStomper
 		private volatile boolean insideTheElementToWatch;
 		
 		private volatile String currentElementName;
-		private volatile LinkedHashSet<String> columnNames;
+		private final AtomicReference<Set<String>> columnNames = new AtomicReference<>();
 		
 		public ColumnDeterminatorHandler(String elementNameToUse) throws IOException
 		{
-			this.columnNames = new LinkedHashSet<>();
+			columnNames.set(new LinkedHashSet<>());
 			this.elementNameToUse = elementNameToUse;
 		}
 		
 		public LinkedHashSet<String> getColumnNames()
 		{
-			return columnNames;
+			return (LinkedHashSet<String>)columnNames.get();
 		}
 
 		@Override
@@ -164,7 +182,7 @@ public class XmlToCSVStomper
 				currentElementName = qName;
 				if(hasJustBeenSet == false)
 				{
-					columnNames.add(currentElementName);
+					columnNames.get().add(currentElementName);
 				}	
 			}
 		}
@@ -218,8 +236,8 @@ public class XmlToCSVStomper
 		private volatile boolean insideTheElementToWatch;
 		
 		private volatile String currentElementName;
-		private volatile StringBuilder currentElementValue;
-		private volatile LinkedHashMap<String, String> columnValues;
+		private final AtomicReference<StringBuffer> currentElementValue = new AtomicReference<>();
+		private final AtomicReference<LinkedHashMap<String, String>> columnValues = new AtomicReference<>();
 		
 		@Override
 		public void endDocument() throws SAXException
@@ -293,10 +311,10 @@ public class XmlToCSVStomper
 			{
 				//logger.info("QName matches : " + elementNameToUse);
 				insideTheElementToWatch = true;
-				columnValues = new LinkedHashMap<>();
+				columnValues.set(new LinkedHashMap<>());
 				allColumnNames.forEach(k -> 
 				{
-					columnValues.put(k, "");
+					columnValues.get().put(k, "");
 				});				
 			}
 			
@@ -304,7 +322,7 @@ public class XmlToCSVStomper
 			{
 				//logger.info("Start : Inside The Element To Watch  -> Create a new ElementName & Value");
 				currentElementName = qName;
-				currentElementValue = new StringBuilder();
+				currentElementValue.set(new StringBuffer());
 			}
 		}
 
@@ -322,10 +340,10 @@ public class XmlToCSVStomper
 					//Print out for now.
 					if(hasWrittenHeader == false)
 					{
-						csvWriter.printRecord(columnValues.keySet());
+						csvWriter.printRecord(columnValues.get().keySet());
 						hasWrittenHeader = true;
 					}
-					csvWriter.printRecord(columnValues.values());
+					csvWriter.printRecord(columnValues.get().values());
 				} 
 				catch (IOException e)
 				{
@@ -335,12 +353,12 @@ public class XmlToCSVStomper
 			
 			if(insideTheElementToWatch == true)
 			{
-				columnValues.put(currentElementName, currentElementValue.toString());
-				columnValues.put(FILENAME_COLUMN, inputXMLFileName);
-				columnValues.put(TIMESTAMP_COLUMN, getTimestampField());
-				columnValues.put(BUSINESS_DATE_COLUMN, getBusinessDateField());
-				columnValues.put(RECORD_VERSION_COLUMN, recordVersionField);
-				columnValues.put(TYPE_COLUMN, typeField);
+				columnValues.get().put(currentElementName, currentElementValue.toString());
+				columnValues.get().put(FILENAME_COLUMN, inputXMLFileName);
+				columnValues.get().put(TIMESTAMP_COLUMN, getTimestampField());
+				columnValues.get().put(BUSINESS_DATE_COLUMN, getBusinessDateField());
+				columnValues.get().put(RECORD_VERSION_COLUMN, recordVersionField);
+				columnValues.get().put(TYPE_COLUMN, typeField);
 			}
 			
 		}
@@ -353,7 +371,7 @@ public class XmlToCSVStomper
 		{
 			if(insideTheElementToWatch == true) 
 			{
-				currentElementValue.append(ch, start, length);
+				currentElementValue.get().append(ch, start, length);
 			}
 			
 		}

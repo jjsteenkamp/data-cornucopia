@@ -331,7 +331,7 @@ public class CreateTableScriptsUtil
 		final String transientName = 	JDBCIncrementerService.TEMP_TABLE_PREFIX + "_" + getTableName() + "_" + getTransientTableSuffix();
 		final String fqName = getSchemaName() + "." + getTableName();
 		final String fqTransientName = getSchemaName() + "." + transientName;
-		final String newCreateTable = createTableSection.get().replace(fqName, fqTransientName);
+		final String newCreateTable = createTableSection.orElseThrow(() -> new IllegalStateException("Unexpected - you have errors in your script: " + getErrorsReport())).replace(fqName, fqTransientName);
 		return new CreateTransientTableScript(getSchemaName(), transientName, newCreateTable);
 	}
 

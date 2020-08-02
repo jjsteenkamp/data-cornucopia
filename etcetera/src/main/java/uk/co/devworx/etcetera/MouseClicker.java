@@ -6,6 +6,7 @@ import java.awt.PointerInfo;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Simple class to click the mouse - e.g. like a dashboard of sorts. 
@@ -16,12 +17,14 @@ import java.util.concurrent.TimeUnit;
 public class MouseClicker
 {
 	public static final int DELAY_MILLISECONDS = 1000 * 60 * 3; //Every 3 minutes.
-	
+
+	private static final AtomicBoolean RUN_MOUSE_CLICKER = new AtomicBoolean(true);
+
 	public static void main(String... args) throws Exception 
 	{
 		final Robot robot = new Robot();
 		
-		while(true)
+		while(RUN_MOUSE_CLICKER.get())
 		{
 			PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 			Point location = pointerInfo == null ? (null) : pointerInfo.getLocation();
@@ -38,6 +41,11 @@ public class MouseClicker
 			TimeUnit.MILLISECONDS.sleep(DELAY_MILLISECONDS);
 		}
 		
+	}
+
+	public static void abort()
+	{
+		RUN_MOUSE_CLICKER.set(true);
 	}
 
 }

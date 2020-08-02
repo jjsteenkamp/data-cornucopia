@@ -198,9 +198,9 @@ public class JDBCIncrementerService
 			stmt.execute(fullyResolvedCreate);
 			logger.info("Created Transient Table - " + transientScript.getResolvedTransientTableName() + " - Now we can infer the descriptor..");
 
-			final Optional<TableSchemaDescriptor> optSchema = getTableSchemaDescriptor(transientScript.getResolvedTransientTableSchema().get(),
+			final Optional<TableSchemaDescriptor> optSchema = getTableSchemaDescriptor(fullyResolvedSchema,
 																					   createUtil.getTableName(),
-																					   transientScript.getResolvedTransientTableName().get(),
+																					   fullyResolvedName,
 																					   Optional.of(transientScript)
 			 																		  );
 			if(optSchema.isPresent() == false)

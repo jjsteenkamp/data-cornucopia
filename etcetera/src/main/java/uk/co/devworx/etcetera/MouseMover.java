@@ -1,11 +1,9 @@
 package uk.co.devworx.etcetera;
 
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.PointerInfo;
-import java.awt.Robot;
-import java.util.concurrent.ThreadLocalRandom;
+import java.awt.*;
+import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Simple class to move the mouse around - to prevent screen locking. 
@@ -16,19 +14,23 @@ import java.util.concurrent.TimeUnit;
 public class MouseMover
 {
 	public static final int DELAY_MILLISECONDS = 1000 * 60 * 3; //Every 3 minutes.
-	
+
+	private static final AtomicBoolean RUN_MOUSE_MOVER = new AtomicBoolean(true);
+
+	private static final SecureRandom rnd = new SecureRandom();
+
 	public static void main(String... args) throws Exception 
 	{
 		final Robot robot = new Robot();
 		
-		while(true)
+		while(RUN_MOUSE_MOVER.get())
 		{
 			final PointerInfo pointerInfo = MouseInfo.getPointerInfo();
 			final Point location = pointerInfo == null ? (null) : pointerInfo.getLocation();
 
 			final int x = (location == null) ? 0 : location.x;
 			final int y = (location == null) ? 0 : location.y;
-			final boolean upOrDown = ThreadLocalRandom.current().nextBoolean();
+			final boolean upOrDown = rnd.nextBoolean();
 
 			int newX = x + (upOrDown ? 1 : -1);
 			
@@ -43,5 +45,11 @@ public class MouseMover
 		}
 		
 	}
+
+	public static void abort()
+	{
+		RUN_MOUSE_MOVER.set(true);
+	}
+
 
 }
