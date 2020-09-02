@@ -16,6 +16,7 @@
  	
  	<modules>
  		<module>elt-with-objects</module>
+ 		<module>push-down-predicates</module>
  	</modules>
 
 
