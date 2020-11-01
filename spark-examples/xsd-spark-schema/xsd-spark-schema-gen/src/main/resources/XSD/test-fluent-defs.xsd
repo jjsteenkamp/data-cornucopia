@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+		   xmlns:annox="http://annox.dev.java.net"
+		   xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+           xmlns:hashCode="http://jaxb2-commons.dev.java.net/basic/hashCode"
+           xmlns:equals="http://jaxb2-commons.dev.java.net/basic/equals"
+           xmlns:toString="http://jaxb2-commons.dev.java.net/basic/toString"
+           xmlns:basic="http://jaxb2-commons.dev.java.net/basic"
+           elementFormDefault="qualified"
+           attributeFormDefault="qualified"
+           xmlns="http://schemas.devworx.co.uk/XSD-Test"
+		   targetNamespace="http://schemas.devworx.co.uk/XSD-Test"
+           jaxb:extensionBindingPrefixes="basic equals hashCode toString annox">
+
+	 
+	<xsd:element name="motorcycleRootElement" >
+        <xsd:complexType>
+            <xsd:sequence>
+               <xsd:element name="motorcycleElement"  type="Motorcycle"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+	<xsd:complexType name="AbstractVehicleContainer" abstract="true">
+		  <xsd:annotation>
+      		<xsd:documentation xml:lang="en">This is an abstract vehicle container object.</xsd:documentation>
+    	</xsd:annotation>
+    	<xsd:sequence>
+      		<xsd:element name="name" type="xsd:string" />
+      		<xsd:element name="container_dateTime" type="xsd:dateTime" />
+      		<xsd:element name="container_date" type="xsd:date" />
+      		<xsd:element name="container_time" type="xsd:time" />
+      	</xsd:sequence>
+	</xsd:complexType>
+
+	  <xsd:complexType name="VehicleContainer">
+		<xsd:annotation>
+      		<xsd:documentation xml:lang="en">The Vehicle Container implementation</xsd:documentation>
+    	</xsd:annotation>
+	    <xsd:complexContent>
+	      <xsd:extension base="AbstractVehicleContainer">
+	        <xsd:choice maxOccurs="unbounded">
+	          <xsd:element name="car" type="Car" />
+	          <xsd:element name="motorcycle" type="Motorcycle" />
+	        </xsd:choice>
+	      </xsd:extension>
+	    </xsd:complexContent>
+	</xsd:complexType>
+	
+	 <xsd:complexType name="VehicleHolder">
+		<xsd:annotation>
+      		<xsd:documentation xml:lang="en">The Vehicle Container implementation</xsd:documentation>
+    	</xsd:annotation>
+	    <xsd:complexContent>
+	      <xsd:extension base="AbstractVehicleContainer">
+	        <xsd:choice maxOccurs="1" minOccurs="1">
+	          <xsd:element name="car" type="Car" />
+	          <xsd:element name="motorcycle" type="Motorcycle" />
+	        </xsd:choice>
+	      </xsd:extension>
+	    </xsd:complexContent>
+	</xsd:complexType>
+	
+	
+	<xsd:complexType name="Car">
+		<xsd:sequence>
+			<xsd:element name="registrationNumber" type="xsd:string" />
+			<xsd:element name="doors" type="xsd:int" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="Motorcycle">
+		<xsd:sequence>
+			<xsd:element name="registrationNumber" type="xsd:string" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:simpleType name="CurrencyEnum">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Denotes a currency</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:token">
+			<xsd:enumeration value="USD">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">United States Dollar</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="GBP">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">British Pound</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="AUD">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Australian Dollar</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="EUR">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Euro Currency</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="DayOfWeek">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="en">Denotes a day of the week</xsd:documentation>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:token">
+			<xsd:enumeration value="MON">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Monday is the day of the week between Sunday and Tuesday.[1] According to the international standard ISO 8601 it is the first day of the week. In countries that adopt the "Sunday-first" convention, it is the second day of the week. The name of Monday is derived from Old English Mōnandæg and Middle English Monenday, originally a translation of Latin dies lunae "day of the Moon".[2]</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="TUES">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Tuesday is the day of the week between Monday and Wednesday. According to international standard ISO 8601, Monday is the first day of the week; thus, Tuesday is the second day of the week. According to some commonly used calendars, however, especially in the United States, Sunday is the first day of the week, so Tuesday is the third day of the week. The English name is derived from Old English Tiwesdæg and Middle English Tewesday, meaning "Tīw's Day", the day of Tiw or Týr, the god of single combat, and law and justice in Norse mythology. Tiw was equated with Mars in the interpretatio germanica, and the name of the day is a translation of Latin dies Martis.</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="WED">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="en">Wednesday is the day of the week between Tuesday and Thursday. According to international standard ISO 8601 it is the third day of the week. In countries that have Friday as their holiday and in some Muslim countries, Wednesday would be the fifth day of the week. In countries that use the Sunday-first convention and in the Jewish Hebrew calendar Wednesday is defined as the fourth day of the week. The name is derived from Old English Wōdnesdæg and Middle English Wednesdei, "day of Woden", reflecting the religion practised by the Anglo-Saxons, the English equivalent to the Norse god Odin. In some other languages, such as the French mercredi or Italian mercoledì, the day's name is a calque of dies Mercurii "day of Mercury".</xsd:documentation>
+				</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+ 
+
+</xsd:schema>
+

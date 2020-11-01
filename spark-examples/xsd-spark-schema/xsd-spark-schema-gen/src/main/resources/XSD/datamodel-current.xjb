@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<jaxb:bindings version="2.1"
+               xmlns:xs="http://www.w3.org/2001/XMLSchema"
+               xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+               xmlns:ci="http://jaxb.dev.java.net/plugin/code-injector"
+               jaxb:extensionBindingPrefixes="ci">
+               
+   <jaxb:bindings schemaLocation="test-fluent-defs.xsd">
+
+    </jaxb:bindings>
+
+</jaxb:bindings>

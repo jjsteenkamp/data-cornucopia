@@ -5,19 +5,18 @@
 
 	<parent>
 		<groupId>uk.co.devworx</groupId>
-		<artifactId>data-cornucopia</artifactId>
+		<artifactId>spark-examples</artifactId>
 		<version>1.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>spark-examples</artifactId>
+	<artifactId>xsd-spark-schema</artifactId>
 	<packaging>pom</packaging>
-	<name>spark-examples</name>
+	<name>xsd-spark-schema</name>
  	
  	<modules>
- 		<module>elt-with-objects</module>
- 		<module>push-down-predicates</module>
-		<module>xsd-spark-schema</module>
+ 		<module>xsd-spark-schema-gen</module>
+		<module>xsd-spark-schema-core</module>
  	</modules>
 
 
