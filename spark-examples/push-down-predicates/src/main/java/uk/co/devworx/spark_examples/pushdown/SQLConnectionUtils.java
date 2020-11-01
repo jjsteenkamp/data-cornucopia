@@ -8,8 +8,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
-
+import java.util.Properties;
 
 /**
  * A simple somewhat trivial class that helps out with the administration of connections
@@ -88,7 +87,13 @@ public class SQLConnectionUtils implements Closeable
 
 	}
 
-
+	public static Properties getProperties()
+	{
+		Properties properties = new Properties();
+		properties.put("user", "sa");
+		properties.put("password", "");
+		return properties;
+	}
 
 	public Connection getConnection()
 	{

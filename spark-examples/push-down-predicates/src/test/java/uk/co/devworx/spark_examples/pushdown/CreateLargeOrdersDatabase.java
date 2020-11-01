@@ -13,8 +13,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class CreateLargeOrdersDatabase
 {
 	//public static final int ORDERS_TO_CREATE = 10_000_000;
-	public static final int ORDERS_TO_CREATE = 1_000_000;
-	//public static final int ORDERS_TO_CREATE = 100_000;
+	//public static final int ORDERS_TO_CREATE = 1_000_000;
+	public static final int ORDERS_TO_CREATE = 100_000;
 	//public static final int ORDERS_TO_CREATE = 1_000;
 	public static final int EVENTS_PER_ORDER = 3;
 	public static final int BATCH_SIZE = 5000;

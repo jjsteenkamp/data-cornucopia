@@ -5,7 +5,7 @@ A few simple [Apache Spark](https://spark.apache.org/) examples demonstrating ba
 Hopefully this section will grow over time.
   
 ## elt-with-objects
-f
+
 *ELT* - Extract Load Transform (a slight variation on the ETL you might be familiar with). Basically show cases how Apache Spark can be used as part of a data pipeline to load and validate CSV data using an object model. 
  
 The model for these market objects are driven off a Java definition under "src/main/java/uk/co/devworx/spark_examples/elt/model". It contains the basics - e.g. beans, immutable object builders and validators. 
@@ -105,6 +105,14 @@ var df_failures = df.map(row => StockPrice.builder()
 					        
 df_failures.foreach(fef =>  ( if(fef.size() > 0) {  println(fef)  }  )  )
 ```
+
+## push-down-predicates
+
+A playground of (mostly) incomplete code samples and experiments concerned with Spark predicates and at what level the executions get pushed down to the worker nodes.
+
+
+
+
 
 
 
