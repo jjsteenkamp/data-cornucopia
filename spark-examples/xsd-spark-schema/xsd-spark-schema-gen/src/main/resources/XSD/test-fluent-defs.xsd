@@ -14,7 +14,7 @@
 		   targetNamespace="http://schemas.devworx.co.uk/XSD-Test"
            jaxb:extensionBindingPrefixes="basic equals hashCode toString annox">
 
-	 
+
 	<xsd:element name="motorcycleRootElement" >
         <xsd:complexType>
             <xsd:sequence>
@@ -43,7 +43,7 @@
 	      <xsd:extension base="AbstractVehicleContainer">
 	        <xsd:choice maxOccurs="unbounded">
 	          <xsd:element name="car" type="Car" />
-	          <xsd:element name="motorcycle" type="Motorcycle" />
+	          <!--<xsd:element name="motorcycle" type="Motorcycle" />-->
 	        </xsd:choice>
 	      </xsd:extension>
 	    </xsd:complexContent>
@@ -57,7 +57,7 @@
 	      <xsd:extension base="AbstractVehicleContainer">
 	        <xsd:choice maxOccurs="1" minOccurs="1">
 	          <xsd:element name="car" type="Car" />
-	          <xsd:element name="motorcycle" type="Motorcycle" />
+	          <!--<xsd:element name="motorcycle" type="Motorcycle" />-->
 	        </xsd:choice>
 	      </xsd:extension>
 	    </xsd:complexContent>

@@ -11,13 +11,24 @@
 
         <xjc:javaType xmlType="xs:dateTime"
                       name="java.time.LocalDateTime"
-                      adapter="io.terahelix.spear.xsd.tests.jaxb.fluent.DateTimeAdapter"/>
+                      adapter="uk.co.devworx.spark.xsdschema.DateTimeAdapter"/>
+
         <xjc:javaType xmlType="xs:date"
                       name="java.time.LocalDate"
-                      adapter="io.terahelix.spear.xsd.tests.jaxb.fluent.DateAdapter"/>
+                      adapter="uk.co.devworx.spark.xsdschema.DateAdapter"/>
+
         <xjc:javaType xmlType="xs:time"
                       name="java.time.LocalTime"
-                      adapter="io.terahelix.spear.xsd.tests.jaxb.fluent.TimeAdapter"/>                      
+                      adapter="uk.co.devworx.spark.xsdschema.TimeAdapter"/>
+
+        <xjc:javaType xmlType="xs:int"
+                      name="java.lang.Long"
+                      adapter="uk.co.devworx.spark.xsdschema.LongAdapter"/>
+
+        <xjc:javaType xmlType="xs:boolean"
+                      name="java.lang.Boolean"
+                      adapter="uk.co.devworx.spark.xsdschema.BooleanAdapter"/>
+
     </jaxb:globalBindings>
     
 </jaxb:bindings>

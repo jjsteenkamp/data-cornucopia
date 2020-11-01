@@ -5,3 +5,5 @@
 **/.project
 **/target
 /.idea/
+/spark-examples/xsd-spark-schema/xsd-spark-schema-gen/src/main/resources/XSD/datamodel-current.xsd
+/spark-examples/xsd-spark-schema/xsd-spark-schema-core/src/test/java/uk/co/devworx/spark/xsdschema/XSDSparkSchemaServiceBuilder_WPT_Test.java

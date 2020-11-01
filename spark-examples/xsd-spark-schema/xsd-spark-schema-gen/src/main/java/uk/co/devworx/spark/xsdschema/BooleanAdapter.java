@@ -1,7 +1,6 @@
 package uk.co.devworx.spark.xsdschema;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
@@ -11,26 +10,26 @@ import java.util.Objects;
  *
  */
 
-public class DateAdapter extends XmlAdapter<String, LocalDate> {
+public class BooleanAdapter extends XmlAdapter<String, Boolean> {
 
 	DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 	
 	@Override
-	public LocalDate unmarshal(String v) {
+	public Boolean unmarshal(String v) {
 		if (Objects.nonNull(v)) {
 			try {
-				return LocalDate.parse(v, pattern);
-			} catch (DateTimeParseException e) {
-				throw new RuntimeException("Failed to parse time: " + v, e);
+				return Boolean.valueOf(v);
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to parse boolean: " + v, e);
 			}
 		}
 		return null;
 	}
 
 	@Override
-	public String marshal(LocalDate v) {
+	public String marshal(Boolean v) {
 		if (Objects.nonNull(v)) {
-			return v.format(pattern);
+			return String.valueOf(v);
 		}
 		return null;
 	}

@@ -1,11 +1,10 @@
-package io.terahelix.spear.xsd.tests.jaxb.fluent;
+package uk.co.devworx.spark.xsdschema;
 
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
-
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  
