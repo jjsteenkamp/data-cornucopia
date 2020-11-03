@@ -7,6 +7,7 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -78,6 +79,35 @@ public class MemberPaths implements Serializable
 		return RowFactory.create(createRowArray(service, subject));
 	}
 
+	MemberPath findMatchingLevelDownMemberPath(MemberPath memberPathInput)
+	{
+		final List<String> attributePath = memberPathInput.getAttributePath();
+		if(attributePath.size() <= 1)
+		{
+			throw new IllegalArgumentException("Cannot determine the level down path - as the attribute list is 1 or less. The Input Member Path was : \n " + memberPathInput);
+		}
 
+		final List<String> attributePathLevelDown = new ArrayList<>(attributePath);
+		attributePathLevelDown.remove(0);
 
+		//Now find a match amongst the members.
+
+		List<MemberPath> memberPaths = getMemberPaths();
+		for(MemberPath mp : memberPaths)
+		{
+			if(mp.getAttributePath().equals(attributePathLevelDown))
+			{
+				return mp;
+			}
+		}
+
+		StringBuilder errorReport = new StringBuilder();
+		errorReport.append("Could not find any level down matching paths for attributes - " + attributePath + " - root class : " + getRootClass() + ". Candidates included: \n");
+		for(MemberPath mp : memberPaths)
+		{
+			errorReport.append(mp.getAttributePath());
+			errorReport.append("\n");
+		}
+		throw new RuntimeException(errorReport.toString());
+	}
 }

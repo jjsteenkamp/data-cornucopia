@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The standalone spark schema service class that
@@ -24,12 +25,18 @@ public class XSDSparkSchemaService implements Serializable
 
 	private final Map<Class<?>, MemberPaths> classMemberPaths;
 	private final Set<Class<?>> serviceEnumTypes;
+	private final Map<Class<?>, MemberPathsRowReader> rowReaderMap;
 
 	XSDSparkSchemaService(Map<Class<?>, MemberPaths> classMemberPaths,
 						 Set<Class<?>> serviceEnumTypesP)
 	{
 		this.classMemberPaths = classMemberPaths;
 		this.serviceEnumTypes = serviceEnumTypesP;
+		this.rowReaderMap = new ConcurrentHashMap<>();
+		classMemberPaths.forEach((k,v) ->
+		{
+			rowReaderMap.put(k, new MemberPathsRowReader(v, XSDSparkSchemaService.this));
+		});
 	}
 
 	public Optional<MemberPaths> getMemberPaths(Class<?> classItem)
@@ -37,6 +44,13 @@ public class XSDSparkSchemaService implements Serializable
 		MemberPaths memberPaths = classMemberPaths.get(classItem);
 		return Optional.ofNullable(memberPaths);
 	}
+
+	public <T> Optional<MemberPathsRowReader<T>> getRowReader(Class<T> classItem)
+	{
+		MemberPathsRowReader<T> rowReader = rowReaderMap.get(classItem);
+		return Optional.ofNullable(rowReader);
+	}
+
 
 	public Row createRow(Object subject)
 	{
@@ -54,7 +68,6 @@ public class XSDSparkSchemaService implements Serializable
 		return row;
 	}
 
-
 	public boolean isEnumValue(Object subject)
 	{
 		Objects.requireNonNull(subject, "You cannot pass in a null argument to this function ! ");
@@ -70,6 +83,55 @@ public class XSDSparkSchemaService implements Serializable
 			throw new IllegalArgumentException("Cannot get a value from a type that is not an enum value - subject is : " + subject + " | " + subject.getClass() + " \n " +  serviceEnumTypes);
 		}
 		return subject.toString();
+	}
+
+	public static Object convertEnumStringToValue(Class<?> enumClass, String enumValue)
+	{
+		return Enum.valueOf((Class)enumClass, enumValue);
+	}
+
+	public static Object convertToJAXBCompatiblePrimitive(final Class<?> valueType, final Object sparkInput)
+	{
+		Objects.requireNonNull(sparkInput, "You cannot pass in a null argument to this function ! ");
+		Class<?> referencedClass = sparkInput.getClass();
+
+		if(valueType.equals(BigInteger.class))
+		{
+			return BigInteger.valueOf( ((Number)sparkInput).longValue() );
+		}
+
+		if(	 	referencedClass.equals(String.class) ||
+				referencedClass.equals(LocalDate.class) ||
+				referencedClass.equals(BigDecimal.class) ||
+				referencedClass.equals(Boolean.class))
+		{
+			return sparkInput;
+		}
+
+		if(referencedClass.equals(BigInteger.class))
+		{
+			BigInteger bi = (BigInteger)sparkInput;
+			return bi.longValue();
+		}
+
+		if(referencedClass.equals(Timestamp.class))
+		{
+			final Timestamp timestamp = (Timestamp)sparkInput;
+			if( valueType.equals(LocalDateTime.class) )
+			{
+				return timestamp.toLocalDateTime();
+			}
+			else if( valueType.equals(LocalDate.class) )
+			{
+				return timestamp.toLocalDateTime().toLocalDate();
+			}
+			else
+			{
+				throw new RuntimeException("Could not convert value - " + sparkInput + " - class of type : " + referencedClass + " - to output of : " + valueType);
+			}
+		}
+
+		throw new RuntimeException("Unable to convert the spark type ("  + sparkInput  + " of class " + referencedClass + "  ) to : " + valueType);
 	}
 
 	public static Object extractSparkCompatiblePrimitive(Object rawValue)
@@ -153,7 +215,7 @@ public class XSDSparkSchemaService implements Serializable
 		if(name.equals("LocalDateTime")) return LocalDateTime.class;
 		if(name.equals("LocalDate")) return LocalDate.class;
 		if(name.equals("LocalTime")) return LocalTime.class;
-		if(name.equals("Boolean")) return BigDecimal.class;
+		if(name.equals("Boolean")) return Boolean.class;
 		if(name.equals("List")) return List.class;
 
 		String fullName =  inputType.getPackage().getName() + "." + name;
