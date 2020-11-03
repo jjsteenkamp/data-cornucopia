@@ -23,6 +23,8 @@ import static uk.co.devworx.spark.xsdschema.XSDSparkSchemaService.extractSparkCo
  */
 public class MemberPath implements Comparable<MemberPath>, Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	public static final String ATTRIBUTE_SEPARATOR_COL_NAME = "_";
 
 	private final Class<?> rootType;

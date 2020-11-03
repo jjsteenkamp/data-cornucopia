@@ -20,6 +20,8 @@ import java.util.Optional;
  */
 public class MemberPathsRowReader<T> implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger logger = LogManager.getLogger(MemberPathsRowReader.class);
 
 	private final MemberPaths memberPaths;

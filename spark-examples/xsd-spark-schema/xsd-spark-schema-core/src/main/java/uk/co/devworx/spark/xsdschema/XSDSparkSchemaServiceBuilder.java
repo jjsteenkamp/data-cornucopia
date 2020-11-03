@@ -22,10 +22,9 @@ import org.apache.spark.sql.types.StructType;
 
 import javax.xml.bind.annotation.XmlElement;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,6 +39,36 @@ import static uk.co.devworx.spark.xsdschema.XSDSparkSchemaService.determineSpark
 public class XSDSparkSchemaServiceBuilder
 {
 	private static final Logger logger = LogManager.getLogger(XSDSparkSchemaServiceBuilder.class);
+
+	/**
+	 * The main method for generating the embedded binary.
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void main(String... args) throws Exception
+	{
+		if(args.length < 2) throw new IllegalArgumentException("Unable to create the schema service - as you haven't specified source inputs.");
+		Path path = Paths.get(args[0]);
+		if(Files.exists(path) == false || Files.isDirectory(path) == false)
+		{
+			throw new IllegalArgumentException("You must specify an input path that is a directory and that exists ! You specified : " + args[0] + " - which equates to : " + path.toAbsolutePath());
+		}
+
+		Path pathOutput = Paths.get(args[1]);
+		Files.createDirectories(pathOutput.getParent());
+
+		XSDSparkSchemaServiceBuilder bldr = new XSDSparkSchemaServiceBuilder(path);
+		XSDSparkSchemaService xsdSparkSchemaService = bldr.buildServiceForFullTypes();
+
+		try(OutputStream fileOut = Files.newOutputStream(pathOutput);
+			ObjectOutputStream ous = new ObjectOutputStream(fileOut))
+		{
+			ous.writeObject(xsdSparkSchemaService);
+		}
+
+		logger.info("All Done - Existing");
+	}
+
 
 	public static final Set<String> CLASS_NAMES_TO_SKIP;
 	static

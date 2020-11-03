@@ -4,6 +4,8 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.DataTypes;
 
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -13,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * The standalone spark schema service class that
@@ -20,6 +23,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class XSDSparkSchemaService implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
+	public static final String EMBEDDED_SCHEMA_SERVICE = "spark-schema/XSDSparkSchemaService.bin";
+
+	/**
+	 * Gets the instance of this service that was loaded from the classpath. This is sufficient for most users.
+	 */
+	public static XSDSparkSchemaService getInstance()
+	{
+		return ___getInstance();
+	}
+
 	public static final int BIG_DECIMAL_SCALE = 10;
 	public static final int BIG_DECIMAL_PRECISION = 38;
 
@@ -234,4 +249,42 @@ public class XSDSparkSchemaService implements Serializable
 	{
 		return Collections.unmodifiableMap(classMemberPaths);
 	}
+
+
+	private static final AtomicReference<XSDSparkSchemaService> embeddedInstance = new AtomicReference<>();
+	private static XSDSparkSchemaService ___getInstance()
+	{
+		XSDSparkSchemaService xsdSparkSchemaService = embeddedInstance.get();
+		if(xsdSparkSchemaService != null) return xsdSparkSchemaService;
+
+		synchronized (embeddedInstance)
+		{
+			xsdSparkSchemaService = embeddedInstance.get();
+			if(xsdSparkSchemaService != null) return xsdSparkSchemaService;
+
+			final ClassLoader loader = XSDSparkSchemaService.class.getClassLoader();
+			final String attempt1 = EMBEDDED_SCHEMA_SERVICE;
+			final String attempt2 = "/" + EMBEDDED_SCHEMA_SERVICE;
+			InputStream ins = loader.getResourceAsStream(attempt1);
+			if(ins == null)
+			{
+				ins = loader.getResourceAsStream(attempt2);
+			}
+			if(ins == null)
+			{
+				throw new RuntimeException("Unable to load the embedded spark schema file - either using : " + attempt1 + " or " + attempt2 );
+			}
+			try(ObjectInputStream ous = new ObjectInputStream(ins))
+			{
+				xsdSparkSchemaService = (XSDSparkSchemaService)ous.readObject();
+				embeddedInstance.set(xsdSparkSchemaService);
+				return xsdSparkSchemaService;
+			}
+			catch(Exception e)
+			{
+				throw new RuntimeException("Unable to read the embedded data file : " + EMBEDDED_SCHEMA_SERVICE + " - got the exception : " + e);
+			}
+		}
+	}
+
 }

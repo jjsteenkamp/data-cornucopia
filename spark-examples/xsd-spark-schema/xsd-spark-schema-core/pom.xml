@@ -15,6 +15,30 @@
 	<name>xsd-spark-schema-core</name>
 	
 	<build>
+
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.1.1</version>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>uk.co.devworx.spark.xsdschema.XSDSparkSchemaServiceBuilder</mainClass>
+							<arguments>
+								<argument>${basedir}/../xsd-spark-schema-gen/target/generated-sources/jaxb</argument>
+								<argument>${basedir}/target/classes/spark-schema/XSDSparkSchemaService.bin</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
 	</build>
 
 	<dependencies>

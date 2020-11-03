@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
  */
 public class MemberPaths implements Serializable
 {
+	private static final long serialVersionUID = 1L;
+
 	private final Class<?> rootClass;
 	private final List<MemberPath> memberPaths;
 	private volatile transient StructType structType;
