@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static uk.co.devworx.spark.xsdschema.XSDSparkSchemaService.extractSparkCompatiblePrimitive;
-
 /**
  * The attribute path leading to a particular member.
  */
@@ -218,7 +216,7 @@ public class MemberPath implements Comparable<MemberPath>, Serializable
 			{
 				if (rowList.get(i) != null)
 				{
-					primValues[i] = extractSparkCompatiblePrimitive(rowList.get(i));
+					primValues[i] = XSDSparkSchemaService.extractSparkCompatiblePrimitive(rowList.get(i));
 				}
 			}
 
@@ -226,7 +224,7 @@ public class MemberPath implements Comparable<MemberPath>, Serializable
 		}
 
 		//Ok - so this must be a simple spark
-		return extractSparkCompatiblePrimitive(rawObject);
+		return XSDSparkSchemaService.extractSparkCompatiblePrimitive(rawObject);
 	}
 
 	private Object extractRawObject(final Object subjectP)

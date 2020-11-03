@@ -30,8 +30,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static uk.co.devworx.spark.xsdschema.XSDSparkSchemaService.determineSparkDataTypeFromLeafType;
-
 /**
  * The main service that will assist in the conversion of XSD types
  * into Spark Schemas
@@ -318,7 +316,7 @@ public class XSDSparkSchemaServiceBuilder
 				}
 				else
 				{
-					DataType targetTypeElements = determineSparkDataTypeFromLeafType(genericReferencedClass);
+					DataType targetTypeElements = XSDSparkSchemaService.determineSparkDataTypeFromLeafType(genericReferencedClass);
 					final ArrayType targetType = DataTypes.createArrayType(targetTypeElements);
 					memberPaths.add(new MemberPath(inputClass,
 												   ordinal,
@@ -332,7 +330,7 @@ public class XSDSparkSchemaServiceBuilder
 			else
 			{
 				//We are referencing a primitive type.
-				DataType targetType = determineSparkDataTypeFromLeafType(referencedClass);
+				DataType targetType = XSDSparkSchemaService.determineSparkDataTypeFromLeafType(referencedClass);
 				memberPaths.add(new MemberPath(inputClass,
 											   ordinal,
 											   Collections.singletonList(variableName),
