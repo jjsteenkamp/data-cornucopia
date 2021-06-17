@@ -25,7 +25,7 @@
 		<spark.version>3.1.1</spark.version>
 		<jaxb.version>2.3.2</jaxb.version>
 		
-    	<tomcat.version>9.0.41</tomcat.version>
+    	<tomcat.version>9.0.46</tomcat.version>
     	
     	<maven.compiler.initial.memory>1024M</maven.compiler.initial.memory>
         <maven.compiler.max.memory>2048M</maven.compiler.max.memory>
